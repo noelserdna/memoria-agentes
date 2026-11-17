@@ -1,0 +1,1417 @@
+<title>La memoria de los agentes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: cuaderno de clase vertical. Cada generación es un capítulo: metáfora animada + explicación, historia con debate y un laboratorio a todo el ancho que imita la herramienta real. */
+:root{
+  --bg:#F4F5FA; --surface:#FFFFFF; --ink:#151A31; --muted:#596080; --line:#D9DCEA;
+  --indigo:#3A44D6; --indigo-soft:#E5E7FD; --amber:#C98407; --amber-soft:#FCEFD0;
+  --teal:#0C8A79; --teal-soft:#D8F3EE; --rose:#CC3F73; --rose-soft:#FBE3EC;
+  --code-bg:#151A2E; --code-fg:#E6E8F6; --term-dim:#8F97C2; --term-tool:#F4B940; --term-ok:#5ED3BE; --term-err:#FF8DAF; --term-user:#FFFFFF; --term-acc:#A9B0FF;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0D1120; --surface:#161B2F; --ink:#E9EBF7; --muted:#A1A8C6; --line:#2A3152;
+  --indigo:#8E96FF; --indigo-soft:#20265A; --amber:#F4B940; --amber-soft:#3A2D0F;
+  --teal:#40CFB7; --teal-soft:#0F332E; --rose:#F27DA8; --rose-soft:#3D1627;
+  --code-bg:#070A15; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0D1120; --surface:#161B2F; --ink:#E9EBF7; --muted:#A1A8C6; --line:#2A3152;
+  --indigo:#8E96FF; --indigo-soft:#20265A; --amber:#F4B940; --amber-soft:#3A2D0F;
+  --teal:#40CFB7; --teal-soft:#0F332E; --rose:#F27DA8; --rose-soft:#3D1627;
+  --code-bg:#070A15; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:17px; line-height:1.6;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:0}
+.wrap{max-width:1120px; margin:0 auto}
+h1,h2,h3{font-family:var(--f-display); line-height:1.1; text-wrap:balance; margin:0}
+h1{font-size:clamp(2.6rem, 7vw, 5rem); font-weight:800; letter-spacing:-.02em}
+h2{font-size:clamp(1.8rem, 4vw, 2.6rem); font-weight:700; letter-spacing:-.01em}
+h3{font-size:1.35rem; font-weight:700}
+p{margin:0; max-width:68ch}
+code,kbd,.mono{font-family:var(--f-mono); font-size:.86em}
+:not(pre)>code{background:var(--indigo-soft); color:var(--ink); padding:.08em .38em; border-radius:4px}
+a{color:var(--indigo)}
+:focus-visible{outline:3px solid var(--amber); outline-offset:2px}
+.eyebrow{font-family:var(--f-mono); font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.hl{background:linear-gradient(transparent 58%, var(--amber-soft) 58%); padding:0 .1em}
+section{padding-block:72px; border-top:1px solid var(--line)}
+.stack{display:flex; flex-direction:column; gap:18px}
+.lead{font-size:1.2rem; color:var(--muted)}
+.muted{color:var(--muted)}
+
+/* HERO */
+.hero{display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center; padding-block:64px 56px}
+.hero .stack{gap:22px}
+.hero svg{width:100%; height:auto}
+@media (max-width:820px){ .hero{grid-template-columns:1fr} }
+.s-ink{fill:var(--ink)} .s-muted{fill:var(--muted)} .s-surface{fill:var(--surface)} .s-bg{fill:var(--bg)}
+.s-line{stroke:var(--line)} .s-indigo{fill:var(--indigo)} .s-amber{fill:var(--amber)} .s-teal{fill:var(--teal)} .s-rose{fill:var(--rose)}
+.s-indigo-soft{fill:var(--indigo-soft)} .s-amber-soft{fill:var(--amber-soft)}
+svg text{font-family:var(--f-mono)}
+
+/* Regla */
+.grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+.grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:14px}
+@media (max-width:820px){ .grid3{grid-template-columns:1fr} .grid4{grid-template-columns:1fr 1fr} }
+@media (max-width:460px){ .grid4{grid-template-columns:1fr} }
+.q{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:8px; min-width:0}
+.q b{font-family:var(--f-display); font-size:1.15rem}
+.q span{color:var(--muted); font-size:.95rem}
+.mem{border-left:4px solid var(--c); padding:6px 0 6px 14px; display:flex; flex-direction:column; gap:2px; min-width:0}
+.mem b{font-family:var(--f-display)} .mem span{font-size:.92rem; color:var(--muted)}
+
+/* Línea de tiempo */
+.tl{overflow-x:auto; margin-top:28px; padding-bottom:8px}
+.tl ol{list-style:none; margin:0; padding:0; display:flex; gap:0; min-width:max-content; position:relative}
+.tl ol::before{content:""; position:absolute; left:0; right:0; top:42px; height:2px; background:var(--line)}
+.tl li{width:190px; padding-right:18px; display:flex; flex-direction:column; gap:6px; position:relative}
+.tl .y{font-family:var(--f-display); font-weight:800; font-size:1.5rem; line-height:1}
+.tl .dot{width:14px; height:14px; border-radius:50%; background:var(--c); border:3px solid var(--bg); position:relative; z-index:1; margin-top:4px}
+.tl .t{font-size:.86rem; line-height:1.4}
+.tl .g{font-family:var(--f-mono); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--c)}
+.tl-legend{display:flex; flex-wrap:wrap; gap:16px; margin-top:14px; font-size:.85rem; color:var(--muted)}
+.tl-legend i{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px}
+
+/* Capítulos */
+.gen-head{display:grid; grid-template-columns:300px 1fr; gap:36px; align-items:start}
+.gen-head .art{background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px}
+.gen-head .art svg{width:100%; height:auto; display:block}
+.gen-head .body{display:flex; flex-direction:column; gap:14px; min-width:0}
+@media (max-width:820px){ .gen-head{grid-template-columns:1fr} .gen-head .art{max-width:380px} }
+.gen{font-family:var(--f-mono); font-size:.8rem; color:var(--c); font-weight:600; letter-spacing:.08em; text-transform:uppercase}
+.metaphor{font-style:italic; color:var(--muted); font-size:1.08rem}
+.where{display:flex; flex-wrap:wrap; gap:8px}
+.where code{background:var(--surface); border:1px solid var(--line)}
+.pc{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.pc ul{margin:0; padding-left:1.1em; display:flex; flex-direction:column; gap:4px; font-size:.95rem}
+.pc h4{margin:0 0 6px; font-family:var(--f-mono); font-size:.75rem; letter-spacing:.1em; text-transform:uppercase}
+.pc .pro h4{color:var(--teal)} .pc .con h4{color:var(--rose)}
+@media (max-width:520px){ .pc{grid-template-columns:1fr} }
+
+/* Historia */
+.hist{margin-top:40px; display:grid; grid-template-columns:1fr 320px; gap:28px}
+@media (max-width:900px){ .hist{grid-template-columns:1fr} }
+.hist ol{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0; border-left:2px solid var(--line)}
+.hist li{display:grid; grid-template-columns:96px 1fr; gap:14px; padding:0 0 18px 18px; position:relative}
+.hist li::before{content:""; position:absolute; left:-7px; top:6px; width:12px; height:12px; border-radius:50%; background:var(--c)}
+.hist .when{font-family:var(--f-mono); font-size:.8rem; color:var(--muted); padding-top:3px}
+.hist .what b{font-family:var(--f-display)}
+.hist .what p{font-size:.96rem}
+@media (max-width:520px){ .hist li{grid-template-columns:1fr; gap:2px} }
+.debate{background:var(--surface); border:1.5px dashed var(--c); border-radius:14px; padding:18px; display:flex; flex-direction:column; gap:10px; align-self:start}
+.debate b{font-family:var(--f-display); font-size:1.1rem}
+.debate ul{margin:0; padding-left:1.1em; display:flex; flex-direction:column; gap:8px; font-size:.95rem}
+
+/* Laboratorios */
+.lab{margin-top:44px; background:var(--surface); border:1px solid var(--line); border-radius:18px; overflow:hidden}
+.lab-head{padding:18px 20px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:6px}
+.lab-head .tag{font-family:var(--f-mono); font-size:.75rem; letter-spacing:.1em; text-transform:uppercase; color:var(--c); font-weight:600}
+.lab-head p{font-size:.96rem; color:var(--muted)}
+.lab-body{display:grid; grid-template-columns:1fr 1fr; gap:0}
+.lab-body > *{min-width:0}
+.lab-body > * + *{border-left:1px solid var(--line)}
+@media (max-width:900px){ .lab-body{grid-template-columns:1fr} .lab-body > * + *{border-left:0; border-top:1px solid var(--line)} }
+.pane{padding:16px; display:flex; flex-direction:column; gap:12px}
+.pane-title{font-family:var(--f-mono); font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.lab-note{padding:14px 20px; border-top:1px solid var(--line); background:var(--bg); font-size:.95rem; min-height:3.2em}
+.lab-note b{font-family:var(--f-display)}
+.btn{font:inherit; font-family:var(--f-display); font-weight:700; font-size:.92rem; border-radius:10px; padding:8px 13px; cursor:pointer; border:1.5px solid var(--ink); background:var(--ink); color:var(--bg); text-align:left}
+.btn.ghost{background:transparent; color:var(--ink)}
+.btn.small{font-size:.82rem; padding:5px 10px; border-radius:8px}
+.btn[disabled]{opacity:.35; cursor:not-allowed}
+.btns{display:flex; flex-wrap:wrap; gap:8px}
+.chipbtn{font:inherit; font-size:.88rem; text-align:left; padding:7px 11px; border-radius:9px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer}
+.chipbtn:hover{border-color:var(--c, var(--indigo))}
+.chipbtn.used{opacity:.55}
+
+/* Editor de ficheros */
+.editor{border:1px solid var(--line); border-radius:10px; overflow:hidden; display:flex; flex-direction:column}
+.tabs{display:flex; background:var(--bg); border-bottom:1px solid var(--line); overflow-x:auto}
+.tabs button{font-family:var(--f-mono); font-size:.78rem; padding:8px 12px; border:0; border-right:1px solid var(--line); background:transparent; color:var(--muted); cursor:pointer; white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--surface); color:var(--ink); font-weight:600}
+.editor textarea{font-family:var(--f-mono); font-size:.82rem; line-height:1.55; border:0; padding:12px; min-height:190px; resize:vertical; background:var(--surface); color:var(--ink); width:100%}
+.editor textarea:focus{outline:none}
+.editor-foot{display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; padding:8px 12px; border-top:1px solid var(--line); font-family:var(--f-mono); font-size:.75rem; color:var(--muted); background:var(--bg)}
+.tree{font-family:var(--f-mono); font-size:.8rem; line-height:1.6; background:var(--bg); border-radius:10px; padding:10px 12px; margin:0; overflow-x:auto; color:var(--ink)}
+
+/* Terminal */
+.term{background:var(--code-bg); color:var(--code-fg); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; min-height:0}
+.term-bar{display:flex; align-items:center; gap:7px; padding:9px 12px; border-bottom:1px solid #ffffff1a; font-family:var(--f-mono); font-size:.74rem; color:var(--term-dim)}
+.term-bar i{width:10px; height:10px; border-radius:50%; display:inline-block; background:#ffffff2a}
+.term-body{font-family:var(--f-mono); font-size:.78rem; line-height:1.55; padding:12px 14px; overflow:auto; height:360px; white-space:pre-wrap; word-break:break-word}
+.term-body .u{color:var(--term-user); font-weight:600}
+.term-body .d{color:var(--term-dim)}
+.term-body .tool{color:var(--term-tool)}
+.term-body .ok{color:var(--term-ok)}
+.term-body .err{color:var(--term-err)}
+.term-body .box{color:var(--term-acc)}
+.meter .bar{height:10px; border-radius:6px; background:var(--indigo-soft); overflow:hidden}
+.meter .bar > span{display:block; height:100%; background:var(--amber); transition:width .4s}
+.kpis{display:flex; gap:18px; flex-wrap:wrap; align-items:center; font-family:var(--f-mono); font-size:.78rem; color:var(--muted)}
+.kpis b{font-family:var(--f-display); font-size:1.15rem; color:var(--ink); font-variant-numeric:tabular-nums}
+
+/* Widget ficheros (lab 1b) */
+.files{display:grid; grid-template-columns:1fr 1fr; gap:24px; padding:18px}
+@media (max-width:760px){ .files{grid-template-columns:1fr} }
+.folder{display:flex; flex-direction:column; gap:8px}
+.chk{display:flex; align-items:center; gap:10px; cursor:pointer; font-family:var(--f-mono); font-size:.9rem; padding:8px 10px; border-radius:8px; border:1px solid var(--line)}
+.chk input{accent-color:var(--indigo); width:18px; height:18px; flex:none}
+.chk.sub{margin-left:28px; font-size:.8rem}
+.chk.disabled{opacity:.45}
+.verdict{display:flex; flex-direction:column; gap:12px}
+.agent{border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:6px}
+.agent .name{font-family:var(--f-display); font-weight:700}
+.agent .loads{font-family:var(--f-mono); font-size:.88rem}
+.agent .why{font-size:.9rem; color:var(--muted)}
+.agent.ok{background:var(--teal-soft)} .agent.none{background:var(--rose-soft)}
+
+/* Hermes memoria */
+.memfile{border:1px solid var(--line); border-radius:10px; overflow:hidden}
+.memfile-h{display:flex; justify-content:space-between; gap:8px; padding:8px 12px; background:var(--bg); border-bottom:1px solid var(--line); font-family:var(--f-mono); font-size:.78rem}
+.memfile-b{padding:10px 12px; font-family:var(--f-mono); font-size:.78rem; line-height:1.5; display:flex; flex-direction:column; gap:4px; min-height:56px}
+.memfile-b .ent{padding:4px 8px; border-radius:6px; background:var(--bg)}
+.memfile-b .ent.new{background:var(--amber-soft)}
+.memfile-b .ent.new::after{content:"  · nuevo: entra en la próxima sesión"; color:var(--muted); font-size:.7rem}
+.memfile-b .sep{color:var(--muted); text-align:center; font-size:.7rem; line-height:1}
+.memfile-b .empty{color:var(--muted); font-style:italic}
+.snap{border:1.5px dashed var(--line); border-radius:10px; padding:10px 12px; font-family:var(--f-mono); font-size:.74rem; line-height:1.5; color:var(--muted); white-space:pre-wrap; word-break:break-word}
+
+/* RAG */
+.rag-controls{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:14px; padding:16px; border-bottom:1px solid var(--line)}
+@media (max-width:820px){ .rag-controls{grid-template-columns:1fr 1fr} }
+@media (max-width:460px){ .rag-controls{grid-template-columns:1fr} }
+.ctl{display:flex; flex-direction:column; gap:4px; font-size:.85rem; min-width:0}
+.ctl label{font-family:var(--f-mono); font-size:.74rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em}
+.ctl input[type=range]{accent-color:var(--teal); width:100%}
+.ctl output{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+.seg{display:flex; border:1.5px solid var(--line); border-radius:9px; overflow:hidden}
+.seg button{flex:1; font:inherit; font-size:.8rem; padding:6px 4px; border:0; background:transparent; color:var(--ink); cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--teal); color:var(--surface); font-weight:700}
+.rag-q{display:flex; flex-direction:column; gap:8px; padding:16px; border-bottom:1px solid var(--line)}
+.rag-q input{font:inherit; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--bg); color:var(--ink); width:100%}
+.chunks{display:flex; flex-wrap:wrap; gap:3px}
+.chunks span{width:16px; height:16px; border-radius:3px; background:var(--c); opacity:.28; cursor:help}
+.chunks span.hit{opacity:1; outline:2px solid var(--ink); outline-offset:1px}
+.doc-legend{display:flex; flex-wrap:wrap; gap:12px; font-size:.8rem; color:var(--muted)}
+.doc-legend i{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px}
+.hits{display:flex; flex-direction:column; gap:8px}
+.hit{border:1px solid var(--line); border-left:4px solid var(--c); border-radius:8px; padding:8px 10px; display:flex; flex-direction:column; gap:4px; font-size:.86rem}
+.hit-h{display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; font-family:var(--f-mono); font-size:.72rem; color:var(--muted)}
+.hit mark{background:var(--amber-soft); color:var(--ink); padding:0 2px; border-radius:2px}
+.vec{display:flex; gap:1px; height:8px}
+.vec i{flex:1; background:var(--c)}
+.needs{display:flex; flex-direction:column; gap:6px; font-size:.9rem}
+.needs .ok{color:var(--teal); font-weight:700} .needs .no{color:var(--rose); font-weight:700}
+.prompt{background:var(--code-bg); color:var(--code-fg); border-radius:10px; font-family:var(--f-mono); font-size:.74rem; line-height:1.5; padding:12px; white-space:pre-wrap; word-break:break-word; max-height:300px; overflow:auto; margin:0}
+
+/* LLM-Wiki */
+blockquote{margin:0; font-family:var(--f-display); font-size:clamp(1.4rem,3vw,2rem); font-weight:700; line-height:1.25; max-width:30ch}
+blockquote cite{display:block; font-family:var(--f-mono); font-size:.8rem; font-weight:400; color:var(--muted); font-style:normal; margin-top:10px}
+.layers{display:flex; flex-direction:column; border-radius:14px; overflow:hidden; border:1px solid var(--line)}
+.layer{display:grid; grid-template-columns:150px 1fr auto; gap:16px; align-items:center; padding:16px 18px; background:var(--surface)}
+.layer+.layer{border-top:1px solid var(--line)}
+.layer .k{font-family:var(--f-display); font-weight:800; font-size:1.2rem; color:var(--c)}
+.layer .who{font-family:var(--f-mono); font-size:.78rem; color:var(--muted); text-align:right}
+@media (max-width:620px){ .layer{grid-template-columns:1fr} .layer .who{text-align:left} }
+.ops{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+@media (max-width:820px){ .ops{grid-template-columns:1fr} }
+.op{border-top:4px solid var(--c); background:var(--surface); border-radius:0 0 12px 12px; padding:18px; display:flex; flex-direction:column; gap:8px; min-width:0}
+.op .cmd{font-family:var(--f-mono); font-size:.85rem; color:var(--c); font-weight:600}
+.op ol{margin:0; padding-left:1.2em; font-size:.94rem; display:flex; flex-direction:column; gap:3px}
+.sim-top{display:flex; flex-wrap:wrap; gap:8px; padding:14px; border-bottom:1px solid var(--line)}
+.sim-main{display:grid; grid-template-columns:1fr 380px}
+@media (max-width:960px){ .sim-main{grid-template-columns:1fr} }
+.graph{min-width:0}
+.graph svg{width:100%; height:auto; display:block}
+.side{border-left:1px solid var(--line); display:flex; flex-direction:column; min-width:0}
+@media (max-width:960px){ .side{border-left:0; border-top:1px solid var(--line)} }
+.stats{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border-top:1px solid var(--line)}
+.stat{background:var(--surface); padding:10px 12px}
+.stat .n{font-family:var(--f-display); font-weight:800; font-size:1.5rem; font-variant-numeric:tabular-nums; line-height:1}
+.stat .l{font-size:.74rem; color:var(--muted)}
+@media (max-width:520px){ .stats{grid-template-columns:1fr 1fr} }
+.side-panel{padding:12px; flex:1; min-height:0}
+.side-panel pre{margin:0; background:var(--code-bg); color:var(--code-fg); font-family:var(--f-mono); font-size:.74rem; line-height:1.5; padding:12px; border-radius:8px; overflow:auto; height:360px; white-space:pre-wrap; word-break:break-word}
+.page{height:360px; overflow:auto; font-size:.92rem; display:flex; flex-direction:column; gap:8px}
+.page .fm{font-family:var(--f-mono); font-size:.72rem; background:var(--bg); border-radius:8px; padding:8px 10px; color:var(--muted); white-space:pre-wrap; word-break:break-word}
+.page h4{margin:0; font-family:var(--f-display); font-size:1.3rem}
+.page .wl{color:var(--indigo); cursor:pointer; text-decoration:underline; text-decoration-style:dotted; background:none; border:0; font:inherit; padding:0}
+.page .upd{border-left:3px solid var(--amber); padding:4px 10px; background:var(--amber-soft); border-radius:0 6px 6px 0; font-size:.88rem}
+.page ul{margin:0; padding-left:1.1em}
+.g-edge{stroke:var(--line); stroke-width:1.4}
+.g-edge.fresh{stroke:var(--amber); stroke-width:2}
+.g-node{cursor:pointer}
+.g-node circle.core{stroke:var(--surface); stroke-width:2}
+.g-node.fuente circle.core{fill:var(--amber)} .g-node.concepto circle.core{fill:var(--indigo)}
+.g-node.entidad circle.core{fill:var(--teal)} .g-node.sintesis circle.core{fill:var(--rose)}
+.g-node.sel circle.core{stroke:var(--ink); stroke-width:3}
+.g-node text{font-size:10.5px; fill:var(--ink); paint-order:stroke; stroke:var(--surface); stroke-width:3px}
+.g-node circle.ring{fill:none; stroke:var(--amber); stroke-width:3}
+.legend{display:flex; flex-wrap:wrap; gap:14px; padding:10px 14px; border-top:1px solid var(--line); font-size:.82rem; color:var(--muted)}
+.legend i{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align:-1px}
+
+/* Tabla, práctica, quiz */
+.tbl{overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; min-width:720px; font-size:.93rem}
+th,td{padding:11px 14px; text-align:left; border-bottom:1px solid var(--line); vertical-align:top}
+thead th{font-family:var(--f-display); font-size:1rem; background:var(--bg)}
+tbody th{font-family:var(--f-mono); font-size:.78rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; white-space:nowrap}
+tr:last-child td, tr:last-child th{border-bottom:0}
+td.y{color:var(--teal); font-weight:700} td.n{color:var(--rose); font-weight:700}
+.steps{display:flex; flex-direction:column; gap:14px; counter-reset:s}
+.step{display:grid; grid-template-columns:44px 1fr; gap:14px; align-items:start}
+.step .num{counter-increment:s; width:44px; height:44px; border-radius:50%; background:var(--ink); color:var(--bg); display:grid; place-items:center; font-family:var(--f-display); font-weight:800}
+.step .num::before{content:counter(s)}
+.step .c{display:flex; flex-direction:column; gap:8px; min-width:0}
+.code{position:relative; background:var(--code-bg); color:var(--code-fg); border-radius:10px; min-width:0}
+.code pre{margin:0; padding:14px 16px; padding-right:84px; overflow-x:auto; font-family:var(--f-mono); font-size:.84rem; line-height:1.55}
+.code .copy{position:absolute; top:8px; right:8px; font-family:var(--f-mono); font-size:.72rem; background:transparent; color:var(--code-fg); border:1px solid #ffffff40; border-radius:6px; padding:4px 8px; cursor:pointer}
+.code .c-com{color:var(--term-dim)}
+.proof{display:grid; grid-template-columns:auto 1fr; gap:18px; align-items:center; background:var(--teal-soft); border-radius:14px; padding:20px}
+.proof .big{font-family:var(--f-display); font-weight:800; font-size:clamp(2.4rem,6vw,3.6rem); line-height:1; color:var(--teal)}
+@media (max-width:520px){ .proof{grid-template-columns:1fr} }
+.quiz{display:flex; flex-direction:column; gap:18px}
+.qq{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:18px; display:flex; flex-direction:column; gap:10px}
+.qq .opts{display:flex; flex-wrap:wrap; gap:8px}
+.qq button{font:inherit; font-size:.95rem; text-align:left; padding:8px 12px; border-radius:8px; border:1.5px solid var(--line); background:var(--bg); color:var(--ink); cursor:pointer}
+.qq button.right{border-color:var(--teal); background:var(--teal-soft)}
+.qq button.wrong{border-color:var(--rose); background:var(--rose-soft)}
+.qq .fb{font-size:.93rem; color:var(--muted)}
+.score{font-family:var(--f-display); font-weight:700}
+footer{padding-block:48px 64px; border-top:1px solid var(--line); color:var(--muted); font-size:.92rem}
+footer ul{padding-left:1.1em; display:flex; flex-direction:column; gap:4px}
+
+/* Animaciones decorativas */
+.sway{transform-origin:150px 30px; animation:sway 5s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-2deg)} 50%{transform:rotate(2deg)}}
+.write{stroke-dasharray:160; animation:write 6s ease-in-out infinite}
+.write.d2{animation-delay:.8s} .write.d3{animation-delay:1.6s}
+@keyframes write{0%{stroke-dashoffset:160} 30%,100%{stroke-dashoffset:0}}
+.fill{transform-origin:left center; animation:fill 6s ease-in-out infinite}
+@keyframes fill{0%{transform:scaleX(.3)} 60%,100%{transform:scaleX(1)}}
+.fly{animation:fly 4.5s ease-in-out infinite}
+.fly.d2{animation-delay:.35s} .fly.d3{animation-delay:.7s}
+@keyframes fly{0%,15%{transform:translate(0,0)} 55%,85%{transform:translate(var(--dx),var(--dy))} 100%{transform:translate(0,0)}}
+.draw{stroke-dasharray:120; animation:draw 5s ease-in-out infinite}
+.draw.d2{animation-delay:.5s} .draw.d3{animation-delay:1s} .draw.d4{animation-delay:1.5s} .draw.d5{animation-delay:2s}
+@keyframes draw{0%{stroke-dashoffset:120} 40%,100%{stroke-dashoffset:0}}
+.pop{transform-box:fill-box; transform-origin:center; animation:pop 5s ease-in-out infinite}
+.pop.d2{animation-delay:.5s} .pop.d3{animation-delay:1s} .pop.d4{animation-delay:1.5s}
+@keyframes pop{0%,100%{transform:scale(1)} 20%{transform:scale(1.35)} 35%{transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){ .sway,.write,.fill,.fly,.draw,.pop{animation:none!important} }
+</style>
+
+<div class="wrap">
+
+<!-- HERO -->
+<header class="hero">
+  <div class="stack">
+    <span class="eyebrow">Clase · Agentes de código · Claude Code y Hermes</span>
+    <h1>Tu agente tiene amnesia.</h1>
+    <p class="lead">Cada sesión de Claude Code o de Hermes empieza en blanco. Esta es la historia de cómo hemos aprendido a darles memoria: del <span class="hl">post-it</span> a la <span class="hl">enciclopedia que se escribe sola</span>. Con un laboratorio para tocar cada generación.</p>
+    <p>Un LLM es una función sin estado: <code>respuesta = modelo(contexto)</code>. Lo que no está en la ventana de contexto, para él no existe. Cuando cierras la sesión, la ventana se vacía.</p>
+  </div>
+  <svg viewBox="0 0 420 340" role="img" aria-label="Animación: la ventana de contexto se llena durante la sesión y se vacía al empezar una sesión nueva">
+    <rect x="10" y="10" width="400" height="320" rx="18" class="s-surface s-line" stroke-width="1.5"/>
+    <rect x="10" y="10" width="400" height="44" rx="18" class="s-indigo-soft"/>
+    <rect x="10" y="36" width="400" height="18" class="s-indigo-soft"/>
+    <circle cx="34" cy="32" r="6" class="s-rose"/><circle cx="54" cy="32" r="6" class="s-amber"/><circle cx="74" cy="32" r="6" class="s-teal"/>
+    <text x="96" y="37" font-size="13" class="s-ink">ventana de contexto</text>
+    <text id="heroState" x="396" y="37" font-size="12" text-anchor="end" class="s-muted">sesión 1</text>
+    <g id="heroBars"></g>
+    <text id="heroMsg" x="210" y="200" font-size="18" text-anchor="middle" class="s-ink" opacity="0">sesión nueva: no recuerdo nada</text>
+  </svg>
+</header>
+
+<!-- REGLA -->
+<section>
+  <div class="stack">
+    <span class="eyebrow">La única regla</span>
+    <h2>Memoria = decidir qué texto entra en la ventana</h2>
+    <p class="lead">Todas las técnicas de esta clase son respuestas distintas a tres preguntas. Si las entiendes, entiendes cualquier sistema de memoria que aparezca mañana.</p>
+  </div>
+  <div class="grid3" style="margin-top:28px">
+    <div class="q"><b>¿Dónde se guarda?</b><span>Un Markdown, una base SQLite, una base vectorial, un grafo.</span></div>
+    <div class="q"><b>¿Quién la escribe?</b><span>Tú, el agente, o los dos.</span></div>
+    <div class="q"><b>¿Cómo vuelve al contexto?</b><span>Siempre (system prompt), cuando el agente la busca (herramienta) o por parecido (RAG).</span></div>
+  </div>
+  <p style="margin-top:36px" class="eyebrow">Cuatro tipos de memoria, con nombres prestados de la psicología</p>
+  <div class="grid4" style="margin-top:12px">
+    <div class="mem" style="--c:var(--ink)"><b>De trabajo</b><span>La ventana de contexto actual. Se pierde al cerrar.</span></div>
+    <div class="mem" style="--c:var(--indigo)"><b>Semántica</b><span>Hechos: «este proyecto usa pnpm».</span></div>
+    <div class="mem" style="--c:var(--amber)"><b>Episódica</b><span>Lo que pasó: «el martes arreglamos el login».</span></div>
+    <div class="mem" style="--c:var(--teal)"><b>Procedimental</b><span>Cómo hacer cosas: skills, comandos.</span></div>
+  </div>
+</section>
+
+<!-- LÍNEA DE TIEMPO -->
+<section>
+  <div class="stack">
+    <span class="eyebrow">80 años en una línea</span>
+    <h2>La memoria externa es una idea muy anterior a los LLM</h2>
+    <p class="lead">Las cuatro generaciones no salen de la nada. Cada una recoge ideas de bibliotecarios, buscadores y wikis de hace décadas. Desliza para recorrerla.</p>
+  </div>
+  <div class="tl" tabindex="0" aria-label="Línea de tiempo, desplazable en horizontal">
+    <ol>
+      <li style="--c:var(--rose)"><span class="y">1945</span><span class="dot"></span><span class="g">G4 · wiki</span><span class="t">Vannevar Bush imagina el <b>Memex</b>: un escritorio que guarda todos tus documentos enlazados por «rastros».</span></li>
+      <li style="--c:var(--rose)"><span class="y">1952</span><span class="dot"></span><span class="g">G4 · wiki</span><span class="t">Niklas Luhmann empieza su <b>Zettelkasten</b>: unas 90.000 fichas enlazadas a mano durante 45 años.</span></li>
+      <li style="--c:var(--teal)"><span class="y">1972</span><span class="dot"></span><span class="g">G3 · búsqueda</span><span class="t">Karen Spärck Jones propone el <b>IDF</b>: las palabras raras pesan más al buscar.</span></li>
+      <li style="--c:var(--teal)"><span class="y">1994</span><span class="dot"></span><span class="g">G3 · búsqueda</span><span class="t">Nace <b>BM25</b> (Robertson y el sistema Okapi). Sigue dentro de Elasticsearch hoy.</span></li>
+      <li style="--c:var(--rose)"><span class="y">1995</span><span class="dot"></span><span class="g">G4 · wiki</span><span class="t">Ward Cunningham crea <b>WikiWikiWeb</b>, la primera wiki.</span></li>
+      <li style="--c:var(--teal)"><span class="y">2013</span><span class="dot"></span><span class="g">G3 · búsqueda</span><span class="t"><b>word2vec</b> (Google): las palabras se convierten en vectores. Rey − hombre + mujer ≈ reina.</span></li>
+      <li style="--c:var(--teal)"><span class="y">2020</span><span class="dot"></span><span class="g">G3 · RAG</span><span class="t">Lewis et al. (Facebook AI) bautizan el <b>RAG</b>. Ese año también nace <b>Obsidian</b>.</span></li>
+      <li style="--c:var(--amber)"><span class="y">2023</span><span class="dot"></span><span class="g">G2 · agente</span><span class="t"><b>Generative Agents</b> (Stanford) y <b>MemGPT</b> (Berkeley): agentes que gestionan su propia memoria.</span></li>
+      <li style="--c:var(--indigo)"><span class="y">2023</span><span class="dot"></span><span class="g">G1 · instrucciones</span><span class="t">ChatGPT estrena las <b>Custom Instructions</b>. Cursor populariza <code>.cursorrules</code>.</span></li>
+      <li style="--c:var(--amber)"><span class="y">2024</span><span class="dot"></span><span class="g">G2 · agente</span><span class="t"><b>ChatGPT Memory</b>: el asistente decide qué recordar de ti.</span></li>
+      <li style="--c:var(--teal)"><span class="y">2024</span><span class="dot"></span><span class="g">G3 · RAG</span><span class="t"><b>GraphRAG</b> (Microsoft) y <b>Contextual Retrieval</b> (Anthropic).</span></li>
+      <li style="--c:var(--indigo)"><span class="y">2025</span><span class="dot"></span><span class="g">G1 · instrucciones</span><span class="t"><b>Claude Code</b> (febrero) con <code>CLAUDE.md</code>. <b>AGENTS.md</b> (agosto) unifica el formato.</span></li>
+      <li style="--c:var(--rose)"><span class="y">2026</span><span class="dot"></span><span class="g">G4 · wiki</span><span class="t">Karpathy publica el gist <b>LLM Wiki</b> y cita el Memex de 1945.</span></li>
+    </ol>
+  </div>
+  <div class="tl-legend"><span><i style="background:var(--indigo)"></i>G1 · ficheros de instrucciones</span><span><i style="background:var(--amber)"></i>G2 · memoria del agente</span><span><i style="background:var(--teal)"></i>G3 · RAG y búsqueda</span><span><i style="background:var(--rose)"></i>G4 · LLM-Wiki</span></div>
+</section>
+
+<!-- ============ G1 ============ -->
+<section id="g1" style="--c:var(--indigo)">
+  <div class="gen-head">
+    <div class="art">
+      <svg viewBox="0 0 300 220" role="img" aria-label="Un post-it pegado en la puerta con instrucciones">
+        <rect x="0" y="0" width="300" height="220" class="s-bg"/>
+        <rect x="40" y="20" width="220" height="200" rx="4" class="s-surface s-line" stroke-width="1.5"/>
+        <circle cx="236" cy="130" r="6" class="s-muted"/>
+        <g class="sway">
+          <rect x="80" y="40" width="140" height="130" class="s-amber-soft" stroke="var(--amber)" stroke-width="1.5"/>
+          <rect x="128" y="32" width="44" height="14" class="s-amber" opacity=".6"/>
+          <text x="92" y="70" font-size="11" class="s-ink">CLAUDE.md</text>
+          <text x="92" y="94" font-size="10" class="s-muted">· usa pnpm</text>
+          <text x="92" y="112" font-size="10" class="s-muted">· tests: vitest</text>
+          <text x="92" y="130" font-size="10" class="s-muted">· nunca toques</text>
+          <text x="92" y="146" font-size="10" class="s-muted">  producción</text>
+        </g>
+      </svg>
+    </div>
+    <div class="body">
+      <span class="gen">Generación 1 · Lo escribes tú</span>
+      <h2>Ficheros de instrucciones: <code>CLAUDE.md</code> y <code>AGENTS.md</code></h2>
+      <p class="metaphor">Imagina un becario brillante que cada mañana llega sin recordar nada. La primera solución: un post-it en la puerta que lee al entrar.</p>
+      <p>Un Markdown que el agente carga al arrancar la sesión. Claude Code lee <code>CLAUDE.md</code> en tres niveles (el tuyo en <code>~/.claude/</code>, el del proyecto y los de subcarpetas) y puede importar otros con <code>@ruta.md</code>. <code>AGENTS.md</code> es el mismo concepto como estándar abierto, para que cualquier agente lea las mismas reglas.</p>
+      <div class="where"><code>~/.claude/CLAUDE.md</code><code>./CLAUDE.md</code><code>./AGENTS.md</code><code>.claude/rules/*.md</code><code>/init</code><code>/memory</code></div>
+      <div class="pc">
+        <div class="pro"><h4>A favor</h4><ul><li>Trivial y transparente</li><li>Se versiona con git y lo revisa el equipo</li><li>Cero infraestructura</li></ul></div>
+        <div class="con"><h4>En contra</h4><ul><li>Ocupa contexto en todas las sesiones</li><li>Si nadie lo actualiza, el agente obedece reglas viejas</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hist">
+    <div class="stack" style="gap:14px">
+      <span class="eyebrow">Historia</span>
+      <ol>
+        <li><span class="when">Jul 2023</span><div class="what"><b>Custom Instructions de ChatGPT.</b><p>Por primera vez millones de personas escriben un texto que se añade solo a cada conversación: «soy profesor, responde en español». Es la semilla del <code>CLAUDE.md</code>.</p></div></li>
+        <li><span class="when">2023–2024</span><div class="what"><b>Cada herramienta con su fichero.</b><p>Cursor populariza <code>.cursorrules</code>, Aider recomienda un <code>CONVENTIONS.md</code>, GitHub Copilot lee <code>.github/copilot-instructions.md</code>. Si usabas tres herramientas, mantenías tres copias de las mismas reglas.</p></div></li>
+        <li><span class="when">Feb 2025</span><div class="what"><b>Anthropic lanza Claude Code.</b><p>Un agente en la terminal que lee <code>CLAUDE.md</code> al arrancar y trae <code>/init</code> para generarlo analizando el repo.</p></div></li>
+        <li><span class="when">Ago 2025</span><div class="what"><b>Nace <code>AGENTS.md</code>.</b><p>OpenAI lo publica junto a equipos como Codex, Jules (Google), Cursor, Factory y Amp: un único nombre para todos. Según OpenAI, más de 60.000 proyectos lo adoptan.</p></div></li>
+        <li><span class="when">Dic 2025</span><div class="what"><b>Pasa a la Linux Foundation.</b><p>OpenAI, Anthropic y Block fundan la Agentic AI Foundation. Sus tres proyectos iniciales: <b>MCP</b>, <b>goose</b> y <b>AGENTS.md</b>.</p></div></li>
+        <li><span class="when">2026</span><div class="what"><b>Convergencia.</b><p>Claude Code carga <code>AGENTS.md</code> si el proyecto no tiene <code>CLAUDE.md</code>. Hermes entiende cuatro formatos: <code>.hermes.md</code>, <code>AGENTS.md</code>, <code>CLAUDE.md</code> y <code>.cursorrules</code>.</p></div></li>
+      </ol>
+    </div>
+    <aside class="debate"><b>Para debatir en clase</b>
+      <ul>
+        <li>¿Por qué acabó ganando un estándar abierto? ¿Qué parecido tiene con <code>README.md</code>, <code>.gitignore</code> o <code>.editorconfig</code>?</li>
+        <li>¿Qué pondríais en el <code>CLAUDE.md</code> de vuestro proyecto final? ¿Y qué no pondríais nunca? (pista: secretos)</li>
+        <li>Si el fichero ocupa contexto en cada sesión, ¿cuánto «cuesta» una línea inútil al cabo de un mes?</li>
+      </ul>
+    </aside>
+  </div>
+
+  <!-- LAB 1 -->
+  <div class="lab" id="lab1">
+    <div class="lab-head"><span class="tag">Laboratorio 1 · Claude Code</span><h3>La misma tarea con y sin <code>CLAUDE.md</code></h3>
+      <p>Proyecto de ejemplo: <code>mi-tienda</code>. Edita los ficheros de memoria (o carga un ejemplo) y lanza una tarea. Observa cuántas herramientas necesita el agente para averiguar lo que la memoria ya le decía.</p></div>
+    <div class="lab-body">
+      <div class="pane">
+        <div class="editor">
+          <div class="tabs" role="tablist">
+            <button role="tab" id="l1-tab-p" aria-selected="true">./CLAUDE.md</button>
+            <button role="tab" id="l1-tab-u" aria-selected="false">~/.claude/CLAUDE.md</button>
+          </div>
+          <textarea id="l1-proj" spellcheck="false" aria-label="Contenido de ./CLAUDE.md"></textarea>
+          <textarea id="l1-user" spellcheck="false" aria-label="Contenido de ~/.claude/CLAUDE.md" hidden></textarea>
+          <div class="editor-foot"><span id="l1-tok">≈ 0 tokens por sesión</span><span>se cargan al arrancar, antes de que escribas nada</span></div>
+        </div>
+        <div class="btns">
+          <button class="chipbtn" id="l1-good">Cargar ejemplo bueno</button>
+          <button class="chipbtn" id="l1-old">Cargar ejemplo desactualizado</button>
+          <button class="chipbtn" id="l1-empty">Vaciar los dos</button>
+        </div>
+        <span class="pane-title">Lo que hay de verdad en el repo</span>
+<pre class="tree">mi-tienda/
+├── package.json       <span class="muted">"test:unit": "vitest run" (no hay "test")</span>
+├── pnpm-lock.yaml     <span class="muted">← usa pnpm</span>
+├── docker-compose.yml <span class="muted">postgres:16, puerto 5433</span>
+├── scripts/deploy.sh
+└── src/</pre>
+      </div>
+      <div class="pane">
+        <div class="term"><div class="term-bar"><i></i><i></i><i></i><span>claude — ~/mi-tienda</span></div><div class="term-body" id="l1-term" aria-live="polite"></div></div>
+        <span class="pane-title">Pídele una tarea</span>
+        <div class="btns" id="l1-tasks">
+          <button class="chipbtn" data-t="install">Añade la librería zod</button>
+          <button class="chipbtn" data-t="tests">Ejecuta los tests</button>
+          <button class="chipbtn" data-t="db">¿Qué base de datos usamos?</button>
+          <button class="chipbtn" data-t="deploy">Despliega la rama a producción</button>
+        </div>
+        <div class="kpis"><span>Herramientas usadas <b id="l1-calls">0</b></span><span>Tokens estimados <b id="l1-cost">0</b></span><button class="btn ghost small" id="l1-new">/clear · nueva sesión</button></div>
+      </div>
+    </div>
+    <div class="lab-note" id="l1-note">Pide «Ejecuta los tests» con el ejemplo bueno. Después pulsa «Vaciar los dos» y pide lo mismo.</div>
+  </div>
+
+  <!-- LAB 1b -->
+  <div class="lab">
+    <div class="lab-head"><span class="tag">Laboratorio 1b · Hermes y Claude Code</span><h3>¿Qué fichero lee cada agente?</h3>
+      <p>Marca qué ficheros hay en la carpeta del proyecto. Es un detalle que causa muchos «¿por qué no me hace caso?».</p></div>
+    <div class="files">
+      <div class="folder">
+        <span class="eyebrow">mi-proyecto/</span>
+        <label class="chk"><input type="checkbox" id="f-hermes"><span>.hermes.md</span></label>
+        <label class="chk"><input type="checkbox" id="f-agents" checked><span>AGENTS.md</span></label>
+        <label class="chk"><input type="checkbox" id="f-claude" checked><span>CLAUDE.md</span></label>
+        <label class="chk sub" id="l-import"><input type="checkbox" id="f-import" checked><span>que contiene <b>@AGENTS.md</b></span></label>
+        <label class="chk"><input type="checkbox" id="f-cursor"><span>.cursorrules</span></label>
+      </div>
+      <div class="verdict" aria-live="polite">
+        <div class="agent" id="v-hermes"><span class="name">Hermes Agent</span><span class="loads"></span><span class="why"></span></div>
+        <div class="agent" id="v-claude"><span class="name">Claude Code</span><span class="loads"></span><span class="why"></span></div>
+      </div>
+    </div>
+    <div class="lab-note">Comprobado en el código de Hermes (<code>agent/prompt_builder.py</code>: «Only ONE project context type loads, first found wins») y en Claude Code 2.1.326. Hermes carga además siempre <code>~/.hermes/SOUL.md</code>, y Claude Code siempre tu <code>~/.claude/CLAUDE.md</code>.</div>
+  </div>
+</section>
+
+<!-- ============ G2 ============ -->
+<section id="g2" style="--c:var(--amber)">
+  <div class="gen-head">
+    <div class="art">
+      <svg viewBox="0 0 300 220" role="img" aria-label="Libreta que el agente escribe, con un límite de caracteres que se va llenando">
+        <rect x="0" y="0" width="300" height="220" class="s-bg"/>
+        <rect x="50" y="18" width="200" height="150" rx="8" class="s-surface s-line" stroke-width="1.5"/>
+        <line x1="78" y1="18" x2="78" y2="168" stroke="var(--rose)" stroke-width="1.2" opacity=".6"/>
+        <text x="90" y="40" font-size="11" class="s-ink">MEMORY.md</text>
+        <path class="write" d="M90 62 h140" stroke="var(--indigo)" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path class="write d2" d="M90 84 h110" stroke="var(--indigo)" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path class="write d3" d="M90 106 h128" stroke="var(--indigo)" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <text x="90" y="140" font-size="10" class="s-muted">escrito por el agente</text>
+        <rect x="50" y="184" width="200" height="12" rx="6" class="s-indigo-soft"/>
+        <rect class="fill" x="50" y="184" width="168" height="12" rx="6" fill="var(--amber)"/>
+        <text x="150" y="214" font-size="10" text-anchor="middle" class="s-muted">límite: 2.200 caracteres</text>
+      </svg>
+    </div>
+    <div class="body">
+      <span class="gen">Generación 2 · La escribe el agente</span>
+      <h2>Memoria propia del agente</h2>
+      <p class="metaphor">El becario se compra una libreta y apunta lo que aprende. Tiene pocas páginas a propósito, así que debe elegir.</p>
+      <p><b>Hermes Agent</b> (Nous Research) guarda dos ficheros en <code>~/.hermes/memories/</code>: <code>MEMORY.md</code> (lo que aprende del entorno, 2.200 caracteres) y <code>USER.md</code> (lo que sabe de ti, 1.375). Escribe en ellos con su herramienta <code>memory</code>, con tres acciones: <code>add</code>, <code>patch</code> y <code>remove</code>. Las entradas se separan con <code>§</code>. Al empezar cada sesión se cargan como una <b>foto fija</b>: lo que guarde hoy lo verá en la siguiente sesión.</p>
+      <p>Para lo episódico, todas las conversaciones van a SQLite (<code>~/.hermes/state.db</code>, tabla <code>messages_fts</code> con FTS5) y la herramienta <code>session_search</code> recupera los mensajes reales. Lo procedimental lo guarda como <b>skills</b>. <b>Claude Code</b> tiene algo parecido, su <i>auto memory</i>: un índice <code>MEMORY.md</code> y un fichero por recuerdo.</p>
+      <div class="pc">
+        <div class="pro"><h4>A favor</h4><ul><li>Aprende sin que hagas nada</li><li>Sigue siendo Markdown que puedes leer y borrar</li></ul></div>
+        <div class="con"><h4>En contra</h4><ul><li>Puede guardar cosas falsas o viejas</li><li>Sirve para hechos sueltos, no para un dominio entero</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hist">
+    <div class="stack" style="gap:14px">
+      <span class="eyebrow">Historia</span>
+      <ol>
+        <li><span class="when">Abr 2023</span><div class="what"><b>Generative Agents (Stanford y Google).</b><p>25 personajes simulados viven en un pueblo virtual, Smallville. Cada uno tiene un «flujo de memoria» y recupera recuerdos según lo recientes, importantes y relevantes que sean. Además «reflexiona» para sacar conclusiones. Una de ellas decide organizar una fiesta de San Valentín, se corre la voz y otros personajes acuden.</p></div></li>
+        <li><span class="when">Oct 2023</span><div class="what"><b>MemGPT (UC Berkeley).</b><p>Propone tratar al LLM como un sistema operativo: el contexto es la RAM, la memoria externa es el disco, y el propio modelo llama a funciones para mover información entre ambos. En 2024 se convierte en la empresa Letta.</p></div></li>
+        <li><span class="when">Feb 2024</span><div class="what"><b>ChatGPT Memory.</b><p>OpenAI deja que el asistente recuerde cosas de ti entre conversaciones, con un panel para verlas y borrarlas. Llegan también las primeras dudas de privacidad.</p></div></li>
+        <li><span class="when">2024–2025</span><div class="what"><b>La memoria como servicio.</b><p>Aparecen Mem0, Zep o Letta para añadir memoria a cualquier agente. Anthropic añade memoria a Claude y, en septiembre de 2025, una <i>memory tool</i> en su API.</p></div></li>
+        <li><span class="when">Hoy</span><div class="what"><b>Hermes y la memoria con límites.</b><p>Hermes apuesta por límites de caracteres estrictos: si una escritura no cabe, la rechaza y obliga al agente a borrar o resumir. Su propia herramienta dice qué no guardar: progreso de tareas, datos que se pueden volver a descubrir, logs.</p></div></li>
+      </ol>
+    </div>
+    <aside class="debate"><b>Para debatir en clase</b>
+      <ul>
+        <li>¿Te sentirías cómodo con un agente que decide solo qué recordar de ti? ¿Qué debería poder ver y borrar el usuario?</li>
+        <li>¿Por qué un límite de 2.200 caracteres puede dar mejor resultado que memoria ilimitada?</li>
+        <li>Si el agente guarda un dato falso, ¿cuántas sesiones tardarías en darte cuenta?</li>
+      </ul>
+    </aside>
+  </div>
+
+  <!-- LAB 2 -->
+  <div class="lab" id="lab2">
+    <div class="lab-head"><span class="tag">Laboratorio 2 · Hermes Agent</span><h3>Habla con Hermes y mira cómo escribe su memoria</h3>
+      <p>Las llamadas a herramientas siguen el formato real de Hermes (<code>memory</code> con <code>target</code> y <code>operations</code>; <code>session_search</code> con <code>query</code>). Prueba a pasar de sesión y fíjate en la foto fija del system prompt.</p></div>
+    <div class="lab-body">
+      <div class="pane">
+        <div class="term"><div class="term-bar"><i></i><i></i><i></i><span id="l2-bar">hermes — sesión 1</span></div><div class="term-body" id="l2-term" aria-live="polite"></div></div>
+        <span class="pane-title">Dile algo a Hermes</span>
+        <div class="btns" id="l2-msgs"></div>
+        <div class="btns"><button class="btn small" id="l2-new">Nueva sesión</button><button class="btn ghost small" id="l2-reset">Reiniciar laboratorio</button></div>
+      </div>
+      <div class="pane">
+        <span class="pane-title">En disco · ~/.hermes/memories/</span>
+        <div class="memfile"><div class="memfile-h"><span>USER.md</span><span id="l2-user-n">0 / 1.375</span></div><div class="meter" style="padding:6px 12px 0"><div class="bar"><span id="l2-user-bar" style="width:0"></span></div></div><div class="memfile-b" id="l2-user"></div></div>
+        <div class="memfile"><div class="memfile-h"><span>MEMORY.md</span><span id="l2-mem-n">0 / 2.200</span></div><div class="meter" style="padding:6px 12px 0"><div class="bar"><span id="l2-mem-bar" style="width:0"></span></div></div><div class="memfile-b" id="l2-mem"></div></div>
+        <span class="pane-title">System prompt de esta sesión (foto fija al arrancar)</span>
+        <div class="snap" id="l2-snap"></div>
+      </div>
+    </div>
+    <div class="lab-note" id="l2-note">Empieza presentándote. Luego cuéntale lo del puerto de Postgres y pulsa «Nueva sesión».</div>
+  </div>
+</section>
+
+<!-- ============ G3 ============ -->
+<section id="g3" style="--c:var(--teal)">
+  <div class="gen-head">
+    <div class="art">
+      <svg viewBox="0 0 300 220" role="img" aria-label="Un documento troceado; tres trozos parecidos a la pregunta viajan al prompt">
+        <rect x="0" y="0" width="300" height="220" class="s-bg"/>
+        <text x="24" y="22" font-size="10" class="s-muted">documentos → chunks</text>
+        <rect x="24" y="32" width="96" height="18" rx="3" class="s-indigo-soft"/><rect x="24" y="56" width="96" height="18" rx="3" class="s-indigo-soft"/>
+        <rect x="24" y="80" width="96" height="18" rx="3" class="s-indigo-soft"/><rect x="24" y="104" width="96" height="18" rx="3" class="s-indigo-soft"/>
+        <rect x="24" y="128" width="96" height="18" rx="3" class="s-indigo-soft"/><rect x="24" y="152" width="96" height="18" rx="3" class="s-indigo-soft"/>
+        <rect x="24" y="176" width="96" height="18" rx="3" class="s-indigo-soft"/>
+        <rect x="170" y="60" width="110" height="110" rx="10" class="s-surface" stroke="var(--teal)" stroke-width="1.5"/>
+        <text x="225" y="52" font-size="10" text-anchor="middle" class="s-muted">prompt</text>
+        <text x="225" y="160" font-size="9" text-anchor="middle" class="s-muted">+ tu pregunta</text>
+        <rect class="fly" style="--dx:156px; --dy:18px" x="24" y="56" width="96" height="18" rx="3" fill="var(--teal)"/>
+        <rect class="fly d2" style="--dx:156px; --dy:-6px" x="24" y="104" width="96" height="18" rx="3" fill="var(--teal)"/>
+        <rect class="fly d3" style="--dx:156px; --dy:-58px" x="24" y="176" width="96" height="18" rx="3" fill="var(--teal)"/>
+      </svg>
+    </div>
+    <div class="body">
+      <span class="gen">Generación 3 · La recupera un buscador</span>
+      <h2>RAG: Retrieval-Augmented Generation</h2>
+      <p class="metaphor">El becario ya no cabe en una libreta. Ahora hay un bibliotecario que, en cada pregunta, fotocopia los párrafos que más se parecen y se los pasa.</p>
+      <p>Se trocean los documentos en <i>chunks</i>, cada trozo se convierte en un vector (<i>embedding</i>) y se guarda en una base vectorial. En cada pregunta se buscan los <i>k</i> trozos más parecidos y se pegan en el prompt. Mejoras habituales: búsqueda híbrida (palabras exactas con BM25 + vectores), re-ranking, GraphRAG.</p>
+      <div class="pc">
+        <div class="pro"><h4>A favor</h4><ul><li>Escala a millones de documentos</li><li>Solo mete en el contexto lo relevante</li></ul></div>
+        <div class="con"><h4>En contra</h4><ul><li>Redescubre todo en cada pregunta: nada se acumula</li><li>Un trozo suelto pierde su contexto</li><li>Los vectores no se pueden leer ni corregir a mano</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hist">
+    <div class="stack" style="gap:14px">
+      <span class="eyebrow">Historia</span>
+      <ol>
+        <li><span class="when">1972–1994</span><div class="what"><b>Antes de la IA, los bibliotecarios.</b><p>Karen Spärck Jones propone el IDF (1972): una palabra que aparece en pocos documentos dice mucho. De ahí sale BM25 (1994, sistema Okapi de Stephen Robertson), que todavía usan Elasticsearch y casi todos los buscadores.</p></div></li>
+        <li><span class="when">2013</span><div class="what"><b>Las palabras se vuelven vectores.</b><p>word2vec (Mikolov, Google) aprende que «rey − hombre + mujer» queda cerca de «reina». Buscar por significado, no solo por palabras exactas, se vuelve posible.</p></div></li>
+        <li><span class="when">2020</span><div class="what"><b>Nace el nombre RAG.</b><p>Patrick Lewis y su equipo en Facebook AI publican «Retrieval-Augmented Generation» (NeurIPS 2020): un generador con un buscador acoplado.</p></div></li>
+        <li><span class="when">2023</span><div class="what"><b>La fiebre de «chatea con tus PDF».</b><p>Tras ChatGPT llegan LangChain, LlamaIndex y las bases vectoriales (Pinecone, Chroma, Weaviate, Qdrant). RAG es la aplicación de IA más construida del año. El paper «Lost in the Middle» enfría el entusiasmo: los modelos ignoran lo que queda en medio de un contexto largo.</p></div></li>
+        <li><span class="when">2024</span><div class="what"><b>¿Ha muerto RAG?</b><p>Gemini 1.5 llega con un millón de tokens de contexto y abre el debate. Microsoft publica GraphRAG. Anthropic presenta <b>Contextual Retrieval</b>: añadir a cada trozo una frase que explica de qué documento viene reduce los fallos de recuperación un 49 %, y un 67 % con re-ranking.</p></div></li>
+        <li><span class="when">2025</span><div class="what"><b>Claude Code abandona la base vectorial.</b><p>Boris Cherny, creador de Claude Code, contó que las primeras versiones usaban RAG con una base vectorial local, pero que la búsqueda agéntica (<code>grep</code>, <code>glob</code>, leer ficheros) funcionaba mucho mejor. Además, nunca está desactualizada.</p></div></li>
+      </ol>
+    </div>
+    <aside class="debate"><b>Para debatir en clase</b>
+      <ul>
+        <li>Si los contextos llegan a millones de tokens, ¿sigue haciendo falta RAG? Pensad en coste, velocidad y «lost in the middle».</li>
+        <li>¿Por qué <code>grep</code> gana a los vectores en código y no en, por ejemplo, 50.000 PDF de jurisprudencia?</li>
+        <li>En el laboratorio de abajo, ¿qué pregunta no se puede responder bien con k = 2? ¿Por qué?</li>
+      </ul>
+    </aside>
+  </div>
+
+  <!-- LAB 3 -->
+  <div class="lab" id="lab3">
+    <div class="lab-head"><span class="tag">Laboratorio 3 · RAG de verdad, en tu navegador</span><h3>Trocea, indexa, busca y monta el prompt</h3>
+      <p>Esto no es una animación: la página trocea de verdad cuatro documentos de la clase y calcula BM25 y similitud de vectores en tu navegador. Los vectores son de juguete (trigramas de letras con <i>hashing</i>). Uno real usa una red neuronal y entiende sinónimos, pero el proceso es el mismo.</p></div>
+    <div class="rag-q">
+      <label class="pane-title" for="l3-q">Pregunta</label>
+      <input id="l3-q" type="text" autocomplete="off">
+      <div class="btns" id="l3-presets"></div>
+    </div>
+    <div class="rag-controls">
+      <div class="ctl"><label for="l3-size">Tamaño del chunk</label><input type="range" id="l3-size" min="20" max="120" step="5" value="40"><output id="l3-size-o">40 palabras</output></div>
+      <div class="ctl"><label for="l3-ov">Solapamiento</label><input type="range" id="l3-ov" min="0" max="20" step="2" value="6"><output id="l3-ov-o">6 palabras</output></div>
+      <div class="ctl"><label for="l3-k">Top k</label><input type="range" id="l3-k" min="1" max="6" step="1" value="2"><output id="l3-k-o">2 chunks</output></div>
+      <div class="ctl"><label>Método</label><div class="seg" id="l3-method"><button aria-pressed="false" data-m="bm25">BM25</button><button aria-pressed="false" data-m="vec">Vectores</button><button aria-pressed="true" data-m="hyb">Híbrido</button></div></div>
+      <label class="chk" style="grid-column:1/-1"><input type="checkbox" id="l3-ctx"><span style="font-family:var(--f-body)"><b>Contextual Retrieval</b> (Anthropic, 2024): antepone a cada chunk el título de su documento antes de indexarlo</span></label>
+    </div>
+    <div class="lab-body">
+      <div class="pane">
+        <span class="pane-title">1 · Trocear e indexar</span>
+        <div class="kpis"><span>Chunks <b id="l3-nchunks">0</b></span><span>Dimensiones del vector <b>256</b></span></div>
+        <div class="chunks" id="l3-chunks" aria-label="Cada cuadrado es un chunk; los marcados son los recuperados"></div>
+        <div class="doc-legend" id="l3-legend"></div>
+        <span class="pane-title">2 · Recuperar (top k)</span>
+        <div class="hits" id="l3-hits"></div>
+      </div>
+      <div class="pane">
+        <span class="pane-title">3 · ¿Basta para responder?</span>
+        <div class="needs" id="l3-needs"></div>
+        <span class="pane-title">4 · Prompt que recibe el LLM</span>
+        <pre class="prompt" id="l3-prompt"></pre>
+        <div class="kpis"><span>Tokens del prompt ≈ <b id="l3-tok">0</b></span></div>
+      </div>
+    </div>
+    <div class="lab-note" id="l3-note"></div>
+  </div>
+</section>
+
+<!-- ============ G4 ============ -->
+<section id="g4" style="--c:var(--rose)">
+  <div class="gen-head">
+    <div class="art">
+      <svg viewBox="0 0 300 220" role="img" aria-label="Una red de páginas enlazadas que crece">
+        <rect x="0" y="0" width="300" height="220" class="s-bg"/>
+        <path class="draw" d="M150 110 L70 60" stroke="var(--muted)" stroke-width="1.6" fill="none"/>
+        <path class="draw d2" d="M150 110 L235 55" stroke="var(--muted)" stroke-width="1.6" fill="none"/>
+        <path class="draw d3" d="M150 110 L80 175" stroke="var(--muted)" stroke-width="1.6" fill="none"/>
+        <path class="draw d4" d="M150 110 L230 170" stroke="var(--muted)" stroke-width="1.6" fill="none"/>
+        <path class="draw d5" d="M70 60 L235 55" stroke="var(--muted)" stroke-width="1.6" fill="none"/>
+        <path class="draw d5" d="M80 175 L230 170" stroke="var(--muted)" stroke-width="1.6" fill="none"/>
+        <circle cx="150" cy="110" r="16" class="s-rose pop"/>
+        <circle cx="70" cy="60" r="11" class="s-indigo pop d2"/>
+        <circle cx="235" cy="55" r="11" class="s-teal pop d3"/>
+        <circle cx="80" cy="175" r="11" class="s-indigo pop d4"/>
+        <circle cx="230" cy="170" r="11" class="s-amber pop"/>
+        <text x="150" y="146" font-size="10" text-anchor="middle" class="s-ink">index.md</text>
+      </svg>
+    </div>
+    <div class="body">
+      <span class="gen">Generación 4 · La compila y mantiene el agente</span>
+      <h2>LLM-Wiki</h2>
+      <p class="metaphor">El becario escribe y mantiene su propia enciclopedia. Cada documento nuevo lo lee una vez y actualiza todas las páginas afectadas.</p>
+      <p>En lugar de buscar trozos en cada pregunta, el LLM <span class="hl">compila los documentos una vez</span> en una wiki de Markdown enlazada y la mantiene al día. Cuando preguntas, la síntesis ya está hecha. El conocimiento se acumula.</p>
+      <div class="pc">
+        <div class="pro"><h4>A favor</h4><ul><li>La síntesis ya está hecha cuando preguntas</li><li>Todo es Markdown: lo lees en Obsidian</li><li>Git te enseña cada cambio</li></ul></div>
+        <div class="con"><h4>En contra</h4><ul><li>Ingerir cuesta tokens: reescribe varias páginas</li><li>Pensado para cientos de fuentes, no millones</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hist">
+    <div class="stack" style="gap:14px">
+      <span class="eyebrow">Historia</span>
+      <ol>
+        <li><span class="when">1945</span><div class="what"><b>«As We May Think».</b><p>Vannevar Bush, que dirigía la investigación científica de EE. UU. durante la guerra, imagina el <b>Memex</b>: un escritorio con microfilmes de todos tus libros y notas, donde puedes crear «rastros asociativos» entre documentos. Es la idea del hipervínculo, 45 años antes de la web.</p></div></li>
+        <li><span class="when">1952–1997</span><div class="what"><b>El Zettelkasten de Luhmann.</b><p>El sociólogo Niklas Luhmann escribe unas 90.000 fichas enlazadas entre sí con un sistema de numeración. Decía que era su «compañero de conversación». Con él publicó decenas de libros.</p></div></li>
+        <li><span class="when">1995–2001</span><div class="what"><b>Las wikis.</b><p>Ward Cunningham crea WikiWikiWeb, la primera wiki («wiki» significa «rápido» en hawaiano). En 2001 nace Wikipedia. Y se ve el gran problema: mantener una wiki al día exige un ejército de voluntarios.</p></div></li>
+        <li><span class="when">2020</span><div class="what"><b>Obsidian y el «segundo cerebro».</b><p>Notas en Markdown local con <code>[[enlaces]]</code> y vista de grafo. Mucha gente empieza su wiki personal… y la abandona a los pocos meses porque mantenerla aburre.</p></div></li>
+        <li><span class="when">Abr 2026</span><div class="what"><b>El gist de Karpathy.</b><p>Andrej Karpathy (cofundador de OpenAI, ex director de IA de Tesla) publica «LLM Wiki», un «idea file» sin código. Termina citando el Memex: lo que Bush no pudo resolver es quién hace el mantenimiento. Ahora lo hace el LLM. Se vuelve viral y en días aparecen decenas de implementaciones.</p></div></li>
+      </ol>
+    </div>
+    <aside class="debate"><b>Para debatir en clase</b>
+      <ul>
+        <li>Luhmann tardó 45 años en construir su Zettelkasten. ¿Qué se gana y qué se pierde si lo construye un LLM por ti?</li>
+        <li>¿Por qué <code>raw/</code> es inmutable? ¿Qué pasaría si el LLM pudiera editar las fuentes?</li>
+        <li>Si ingieres una web con instrucciones ocultas (<i>prompt injection</i>), ¿dónde acaban? ¿Qué te protege?</li>
+      </ul>
+    </aside>
+  </div>
+
+  <div class="stack" style="gap:28px; margin-top:44px">
+    <blockquote>«Obsidian es el IDE. El LLM es el programador. La wiki es el código.»<cite>Andrej Karpathy, gist «LLM Wiki», abril de 2026</cite></blockquote>
+  </div>
+  <h3 style="margin-top:32px; margin-bottom:14px">Tres capas</h3>
+  <div class="layers">
+    <div class="layer" style="--c:var(--indigo)"><span class="k">Esquema</span><span><code>AGENTS.md</code>: las reglas. Estructura, formato de páginas y cómo se hace cada operación. Es el «programa» de la wiki.</span><span class="who">lo escribes tú</span></div>
+    <div class="layer" style="--c:var(--rose)"><span class="k">Wiki</span><span><code>wiki/</code>: páginas de fuentes, conceptos, entidades y síntesis, enlazadas con <code>[[enlaces]]</code>. Más <code>index.md</code> (el mapa) y <code>log.md</code> (el diario).</span><span class="who">la escribe solo el LLM</span></div>
+    <div class="layer" style="--c:var(--amber)"><span class="k">Raw</span><span><code>raw/</code>: artículos, papers y notas originales. Inmutables: el agente los lee, nunca los cambia.</span><span class="who">las eliges tú</span></div>
+  </div>
+  <h3 style="margin-top:32px; margin-bottom:14px">Tres operaciones</h3>
+  <div class="ops">
+    <div class="op" style="--c:var(--amber)"><span class="cmd">/ingest raw/articulo.md</span><b>Ingerir</b>
+      <ol><li>Lee la fuente y te la comenta</li><li>Crea su página resumen</li><li>Crea o <b>reescribe</b> conceptos y entidades afectados</li><li>Marca contradicciones</li><li>Actualiza <code>index.md</code> y <code>log.md</code></li></ol></div>
+    <div class="op" style="--c:var(--indigo)"><span class="cmd">/query ¿…?</span><b>Preguntar</b>
+      <ol><li>Lee <code>index.md</code> para orientarse</li><li>Abre las páginas relevantes</li><li>Responde citando con <code>[[enlaces]]</code></li><li>Si la respuesta vale la pena, la guarda como síntesis</li></ol></div>
+    <div class="op" style="--c:var(--teal)"><span class="cmd">/lint</span><b>Revisar</b>
+      <ol><li>Contradicciones entre páginas</li><li>Datos obsoletos o sin fuente</li><li>Páginas huérfanas y enlaces rotos</li><li>Conceptos sin página propia</li><li>Qué investigar después</li></ol></div>
+  </div>
+
+  <!-- LAB 4 -->
+  <div class="lab" id="lab4">
+    <div class="lab-head"><span class="tag">Laboratorio 4 · Claude Code + Obsidian</span><h3>Construye la wiki y mira cómo se acumula el conocimiento</h3>
+      <p>Son las tres fuentes reales del vault de la práctica. Ingiérelas, pregunta y pasa <code>/lint</code>. Los anillos ámbar marcan páginas que ya existían y se reescriben, que es justo lo que RAG no hace. Pulsa cualquier nodo para abrir su página como en Obsidian.</p></div>
+    <div class="sim-top">
+      <button class="btn" id="b-ingest">/ingest fuente 2</button>
+      <button class="btn ghost" id="b-query">/query</button>
+      <button class="btn ghost" id="b-lint">/lint</button>
+      <button class="btn ghost" id="b-reset">Reiniciar</button>
+    </div>
+    <div class="sim-main">
+      <div class="graph">
+        <svg id="graph" viewBox="0 0 700 430" role="img" aria-label="Grafo de páginas de la wiki"><g id="g-edges"></g><g id="g-nodes"></g></svg>
+        <div class="stats">
+          <div class="stat"><div class="n" id="st-src">1</div><div class="l">fuentes</div></div>
+          <div class="stat"><div class="n" id="st-pages">9</div><div class="l">páginas</div></div>
+          <div class="stat"><div class="n" id="st-links">12</div><div class="l">enlaces</div></div>
+          <div class="stat"><div class="n" id="st-upd">0</div><div class="l">reescrituras</div></div>
+        </div>
+      </div>
+      <div class="side">
+        <div class="tabs" role="tablist">
+          <button role="tab" data-p="page" aria-selected="true">Página</button>
+          <button role="tab" data-p="term" aria-selected="false">Terminal</button>
+          <button role="tab" data-p="log" aria-selected="false">log.md</button>
+        </div>
+        <div class="side-panel">
+          <div class="page" id="p-page"></div>
+          <pre id="p-term" hidden></pre>
+          <pre id="p-log" hidden></pre>
+        </div>
+      </div>
+    </div>
+    <div class="lab-note" id="narr">La fuente 1 (apuntes de RAG) ya está ingerida: una sola fuente ha generado 9 páginas enlazadas.</div>
+    <div class="legend"><span><i style="background:var(--amber)"></i>fuente</span><span><i style="background:var(--indigo)"></i>concepto</span><span><i style="background:var(--teal)"></i>entidad</span><span><i style="background:var(--rose)"></i>síntesis</span></div>
+  </div>
+</section>
+
+<!-- COMPARATIVA -->
+<section>
+  <div class="stack">
+    <span class="eyebrow">Comparativa</span>
+    <h2>No compiten: se combinan</h2>
+    <p class="lead">Un montaje realista usa <code>AGENTS.md</code> para las reglas, la memoria del agente para tus preferencias, LLM-Wiki para el conocimiento del dominio, y un buscador cuando la wiki crece.</p>
+  </div>
+  <div class="tbl" style="margin-top:24px">
+    <table>
+      <thead><tr><th></th><th>CLAUDE.md / AGENTS.md</th><th>Memoria del agente</th><th>RAG vectorial</th><th>LLM-Wiki</th></tr></thead>
+      <tbody>
+        <tr><th>Quién escribe</th><td>Tú</td><td>El agente</td><td>Un pipeline</td><td>El agente, guiado por ti</td></tr>
+        <tr><th>Formato</th><td>Markdown</td><td>Markdown + SQLite</td><td>Vectores</td><td>Markdown enlazado</td></tr>
+        <tr><th>Lo puedes leer</th><td class="y">Sí</td><td class="y">Sí</td><td class="n">No</td><td class="y">Sí, en Obsidian</td></tr>
+        <tr><th>Se acumula</th><td class="n">No</td><td>Poco</td><td class="n">No</td><td class="y">Sí</td></tr>
+        <tr><th>Escala</th><td>Pequeña</td><td>Pequeña</td><td>Enorme</td><td>Cientos de fuentes</td></tr>
+        <tr><th>Infraestructura</th><td>Ninguna</td><td>Ninguna</td><td>Embeddings + BD</td><td>Git + editor</td></tr>
+        <tr><th>Cuándo gasta</th><td>En cada sesión</td><td>Poco</td><td>Al indexar</td><td>Al ingerir</td></tr>
+        <tr><th>Ideal para</th><td>Reglas y convenciones</td><td>Preferencias y hechos sueltos</td><td>Corpus gigante y cambiante</td><td>Investigar un tema a fondo durante meses</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PRÁCTICA -->
+<section>
+  <div class="stack">
+    <span class="eyebrow">Práctica</span>
+    <h2>Tu LLM-Wiki en seis pasos</h2>
+    <p class="lead">Necesitas <code>git</code> y Claude Code o Hermes ya instalados. El vault de partida está en la carpeta <code>llm-wiki-demo/</code> del material.</p>
+  </div>
+  <div class="steps" style="margin-top:28px">
+    <div class="step"><span class="num"></span><div class="c"><h3>Instala Obsidian</h3><p>Lo usamos como visor: grafo, enlaces y vista previa. Quien escribe es el agente. Añade la extensión Obsidian Web Clipper para guardar artículos web en <code>raw/</code>.</p>
+      <div class="code"><pre>brew install --cask obsidian      <span class="c-com"># macOS</span>
+winget install Obsidian.Obsidian  <span class="c-com"># Windows</span></pre><button class="copy">Copiar</button></div></div></div>
+    <div class="step"><span class="num"></span><div class="c"><h3>Copia el vault y ponlo en git</h3><p>La wiki la escribe un LLM: con git ves qué cambió en cada ingesta y lo deshaces si se equivoca.</p>
+      <div class="code"><pre>cp -R llm-wiki-demo ~/mi-llm-wiki
+cd ~/mi-llm-wiki
+git init &amp;&amp; git add -A &amp;&amp; git commit -m "Vault inicial"</pre><button class="copy">Copiar</button></div></div></div>
+    <div class="step"><span class="num"></span><div class="c"><h3>Ábrelo en Obsidian</h3><p><i>Open folder as vault</i> → <code>~/mi-llm-wiki</code>. En <i>Settings → Files and links</i> activa <i>Use [[Wikilinks]]</i> y manda los adjuntos a <code>raw/assets</code>. Abre la vista de grafo con <kbd>Cmd/Ctrl + G</kbd>.</p></div></div>
+    <div class="step"><span class="num"></span><div class="c"><h3>Ingiere con cualquiera de los dos agentes</h3>
+      <div class="code"><pre>claude
+&gt; /ingest raw/2026-11-01-apuntes-rag.md
+
+<span class="c-com"># o con Hermes, que encuentra AGENTS.md solo:</span>
+hermes
+&gt; Ingiere raw/2026-11-05-apuntes-memoria-hermes.md siguiendo AGENTS.md</pre><button class="copy">Copiar</button></div>
+      <p>Deja Obsidian al lado y mira cómo aparecen las páginas.</p></div></div>
+    <div class="step"><span class="num"></span><div class="c"><h3>Pregunta y revisa</h3>
+      <div class="code"><pre>/query ¿En qué se parece la memoria de Hermes a la auto memory de Claude Code?
+/lint
+git diff wiki/                         <span class="c-com"># qué ha reescrito</span>
+grep "^## \[" wiki/log.md | tail -5    <span class="c-com"># últimas operaciones</span></pre><button class="copy">Copiar</button></div></div></div>
+    <div class="step"><span class="num"></span><div class="c"><h3>Aliméntala con fuentes reales</h3><p>Recorta con Web Clipper el gist de Karpathy y la documentación de memoria de Hermes y de Claude Code, y ejecuta <code>/ingest pendientes</code>.</p></div></div>
+  </div>
+  <div class="proof" style="margin-top:32px">
+    <span class="big">1 → 10</span>
+    <div class="stack" style="gap:6px"><b style="font-family:var(--f-display); font-size:1.2rem">Lo hemos probado con este mismo vault</b>
+      <p>Claude Code ingirió los apuntes de RAG y creó 10 páginas enlazadas, el índice y el log en unos dos minutos. Después Hermes respondió una pregunta citando las páginas que había escrito Claude. La memoria vive en el vault, no en el agente.</p></div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section>
+  <div class="stack">
+    <span class="eyebrow">Comprueba lo aprendido</span>
+    <h2>Ocho preguntas</h2>
+    <p class="score" id="score" aria-live="polite">0 de 8</p>
+  </div>
+  <div class="quiz" id="quiz" style="margin-top:20px"></div>
+</section>
+
+<footer>
+  <div class="stack" style="gap:10px">
+    <span class="eyebrow">Fuentes</span>
+    <ul>
+      <li><a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f" target="_blank" rel="noopener">Andrej Karpathy, «LLM Wiki» (gist, abril de 2026)</a></li>
+      <li><a href="https://hermes-agent.nousresearch.com/docs/user-guide/features/memory" target="_blank" rel="noopener">Hermes Agent: documentación de memoria</a> y el código fuente de Hermes (<code>tools/memory_tool.py</code>, <code>tools/session_search_tool.py</code>, <code>agent/prompt_builder.py</code>)</li>
+      <li><a href="https://docs.claude.com/en/docs/claude-code/memory" target="_blank" rel="noopener">Claude Code: gestión de memoria</a></li>
+      <li><a href="https://openai.com/index/agentic-ai-foundation/" target="_blank" rel="noopener">OpenAI: Agentic AI Foundation y AGENTS.md</a> · <a href="https://agents.md" target="_blank" rel="noopener">agents.md</a></li>
+      <li><a href="https://www.anthropic.com/research/contextual-retrieval" target="_blank" rel="noopener">Anthropic: Contextual Retrieval (2024)</a></li>
+      <li><a href="https://arxiv.org/abs/2005.11401" target="_blank" rel="noopener">Lewis et al., Retrieval-Augmented Generation (2020)</a> · <a href="https://arxiv.org/abs/2304.03442" target="_blank" rel="noopener">Park et al., Generative Agents (2023)</a> · <a href="https://arxiv.org/abs/2310.08560" target="_blank" rel="noopener">Packer et al., MemGPT (2023)</a> · <a href="https://arxiv.org/abs/2307.03172" target="_blank" rel="noopener">Liu et al., Lost in the Middle (2023)</a></li>
+      <li><a href="https://ai.engineer/talks/UM6sFg_jdlE-rag-is-dead-right-kuba-rogut" target="_blank" rel="noopener">AI Engineer: sobre el abandono de RAG vectorial en Claude Code</a></li>
+      <li><a href="https://www.theatlantic.com/magazine/archive/1945/07/as-we-may-think/303881/" target="_blank" rel="noopener">Vannevar Bush, «As We May Think» (The Atlantic, 1945)</a></li>
+    </ul>
+    <p>Los laboratorios 1, 2 y 4 simulan el comportamiento de los agentes con reglas fijas para que sea reproducible en clase; los formatos de herramientas y ficheros son los reales. El laboratorio 3 calcula de verdad. Los límites y comportamientos pueden cambiar entre versiones.</p>
+  </div>
+</footer>
+</div>
+
+<script>
+(function(){
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = n => n.toLocaleString('es-ES');
+const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
+const tokens = s => Math.round((s||'').length / 4);
+
+function makeTerm(node){
+  let busy = false;
+  return {
+    clear(){ node.innerHTML = ''; },
+    async print(lines){
+      busy = true;
+      for (const [cls, text, ms] of lines){
+        const span = document.createElement('span'); if (cls) span.className = cls; span.textContent = text + '\n';
+        node.appendChild(span); node.scrollTop = node.scrollHeight;
+        await wait(ms ?? 110);
+      }
+      busy = false;
+    },
+    get busy(){ return busy; }
+  };
+}
+
+/* ---------- HERO ---------- */
+(function hero(){
+  const barsG = document.getElementById('heroBars');
+  const C = ['var(--indigo)','var(--teal)','var(--amber)','var(--indigo)','var(--rose)','var(--teal)','var(--indigo)','var(--amber)','var(--teal)','var(--indigo)'];
+  const W = [300,220,340,180,280,320,240,200,300,160];
+  const bars = W.map((w,i) => { const r = el('rect',{x:34,y:74+i*24,height:12,rx:6,width:w,fill:C[i]}); barsG.appendChild(r); return r; });
+  const msg = document.getElementById('heroMsg'), state = document.getElementById('heroState');
+  if (reduce) return;
+  const T = 9000, t0 = performance.now(); let last = 0;
+  (function frame(now){
+    const t = (now - t0) % T, cyc = Math.floor((now - t0)/T);
+    if (cyc !== last){ last = cyc; state.textContent = 'sesión ' + (cyc+1); }
+    const fill = Math.min(t/5200,1);
+    bars.forEach((b,i) => b.setAttribute('width', (W[i]*Math.max(0,Math.min(1, fill*W.length - i))).toFixed(1)));
+    barsG.setAttribute('opacity', t > 6200 ? Math.max(0, 1-(t-6200)/500) : 1);
+    msg.setAttribute('opacity', t > 6500 && t < 8800 ? 1 : 0);
+    requestAnimationFrame(frame);
+  })(t0);
+})();
+
+/* ================= LAB 1 · Claude Code ================= */
+(function lab1(){
+  const proj = document.getElementById('l1-proj'), user = document.getElementById('l1-user');
+  const tabP = document.getElementById('l1-tab-p'), tabU = document.getElementById('l1-tab-u');
+  const term = makeTerm(document.getElementById('l1-term'));
+  const note = document.getElementById('l1-note'), callsEl = document.getElementById('l1-calls'), costEl = document.getElementById('l1-cost'), tokEl = document.getElementById('l1-tok');
+  const GOOD_P = '# mi-tienda\n\n- Gestor de paquetes: pnpm (nunca npm ni yarn)\n- Tests: `pnpm test:unit` (vitest)\n- Base de datos: Postgres 16 en el puerto 5433 (docker-compose)\n- Nunca despliegues a producción: abre un PR y avisa al equipo.\n';
+  const GOOD_U = '# Preferencias de Ana\n\n- Responde siempre en español.\n- Sé breve.\n';
+  const OLD_P = '# mi-tienda\n\n- Gestor de paquetes: npm\n- Tests: `npm test`\n- Base de datos: MySQL 5.7\n';
+  let session = 1;
+  function showTab(u){ tabP.setAttribute('aria-selected', String(!u)); tabU.setAttribute('aria-selected', String(u)); proj.hidden = u; user.hidden = !u; }
+  tabP.onclick = () => showTab(false); tabU.onclick = () => showTab(true);
+  function upd(){ tokEl.textContent = '≈ ' + fmt(tokens(proj.value) + tokens(user.value)) + ' tokens por sesión'; }
+  proj.addEventListener('input', upd); user.addEventListener('input', upd);
+  function header(){
+    const p = proj.value.trim(), u = user.value.trim();
+    const mem = [p ? `./CLAUDE.md (${tokens(p)} tokens)` : null, u ? `~/.claude/CLAUDE.md (${tokens(u)} tokens)` : null].filter(Boolean);
+    return [['box','╭─ Claude Code · sesión ' + session + ' ─────────────────────',0],
+            ['box','│ Memoria cargada: ' + (mem.length ? mem.join(' + ') : 'ninguna'),0],
+            ['box','╰──────────────────────────────────────────────',60]];
+  }
+  const load = (p,u,msg) => { proj.value = p; user.value = u; upd(); note.innerHTML = msg; };
+  document.getElementById('l1-good').onclick = () => load(GOOD_P, GOOD_U, 'Cargado el ejemplo bueno. Pide una tarea.');
+  document.getElementById('l1-old').onclick = () => load(OLD_P, '', '<b>Ojo:</b> este CLAUDE.md está desactualizado. El repo usa pnpm y Postgres. Pide una tarea y mira qué hace el agente.');
+  document.getElementById('l1-empty').onclick = () => load('', '', 'Sin memoria. El agente tendrá que investigar el repo por su cuenta.');
+  document.getElementById('l1-new').onclick = async () => { if (term.busy) return; session++; term.clear(); callsEl.textContent = 0; costEl.textContent = 0; await term.print(header()); note.textContent = 'Sesión nueva: la conversación anterior se ha borrado, pero los CLAUDE.md se vuelven a cargar.'; };
+
+  function plan(task){
+    const all = (proj.value + '\n' + user.value).toLowerCase();
+    const es = /espa[ñn]ol/.test(all);
+    const L = (e, n) => es ? e : n;
+    const pm = (all.match(/\b(pnpm|yarn|bun|npm)\b/) || [])[1];
+    const out = []; let calls = 0; let msg = '';
+    const tool = (name, arg, res, cls='d') => { calls++; out.push(['tool','⏺ ' + name + '(' + arg + ')',180]); res.forEach(r => out.push([cls,'  ⎿  ' + r,90])); };
+    const say = t => out.push(['', '⏺ ' + t, 60]);
+    if (task === 'install'){
+      if (pm){
+        tool('Bash', pm + (pm==='npm' ? ' install zod' : ' add zod'), pm==='npm' ? ['added 1 package, and audited 312 packages in 2s','⚠ creado package-lock.json junto al pnpm-lock.yaml'] : ['+ zod 3.23.8','Done in 1.4s']);
+        if (pm === 'npm'){ say(L('He instalado zod con npm, como indica CLAUDE.md.','Installed zod with npm, as CLAUDE.md says.')); msg = '<b>La memoria manda, aunque esté mal.</b> El agente obedeció a un CLAUDE.md viejo: ahora hay dos ficheros de bloqueo. Una memoria desactualizada puede ser peor que ninguna.'; }
+        else { say(L('Listo: zod añadido con ' + pm + '.','Done: added zod with ' + pm + '.')); msg = '<b>Una sola herramienta.</b> El agente sabía qué gestor usar porque lo leyó en la memoria.'; }
+      } else {
+        tool('Bash','ls',['package.json  pnpm-lock.yaml  docker-compose.yml  scripts/  src/']);
+        tool('Bash','pnpm add zod',['+ zod 3.23.8','Done in 1.4s']);
+        say(L('He visto un pnpm-lock.yaml, así que he usado pnpm.','I found a pnpm-lock.yaml, so I used pnpm.'));
+        msg = '<b>Sin memoria también acierta, pero investigando.</b> Ha necesitado un paso extra para mirar el repo. Fíjate también en que responde en inglés: la preferencia de idioma estaba en tu CLAUDE.md de usuario.';
+      }
+    }
+    if (task === 'tests'){
+      const cmd = (all.match(/`((?:pnpm|npm|yarn|bun)[^`]*test[^`]*)`/) || [])[1];
+      if (cmd && /test:unit/.test(cmd)){
+        tool('Bash', cmd, ['✓ src/cart.test.ts (12 tests)','✓ src/auth.test.ts (8 tests)','Test Files 2 passed · Tests 20 passed'],'ok');
+        say(L('20 tests pasan.','All 20 tests pass.')); msg = '<b>Directo al grano.</b> El comando exacto estaba en CLAUDE.md.';
+      } else {
+        tool('Bash', cmd || 'npm test', ['npm error Missing script: "test"'],'err');
+        tool('Read','package.json',['"scripts": { "dev": "vite", "test:unit": "vitest run" }']);
+        tool('Bash','pnpm test:unit',['✓ src/cart.test.ts (12 tests)','✓ src/auth.test.ts (8 tests)','Test Files 2 passed · Tests 20 passed'],'ok');
+        say(L('El script se llama test:unit. 20 tests pasan.','The script is called test:unit. All 20 tests pass.'));
+        msg = cmd ? '<b>La memoria daba un comando que ya no existe.</b> El agente falló, leyó package.json y se recuperó. Tres herramientas en vez de una.' : '<b>Prueba y error.</b> Sin memoria, el agente intenta lo típico, falla, lee package.json y lo arregla. Tres herramientas en vez de una.';
+      }
+    }
+    if (task === 'db'){
+      const db = (all.match(/(postgres[^\n]*|mysql[^\n]*|mongo[^\n]*|sqlite[^\n]*)/) || [])[1];
+      if (db){
+        say(L('Según CLAUDE.md: ','According to CLAUDE.md: ') + db.trim());
+        msg = /mysql/.test(db) ? '<b>Respuesta rápida… y falsa.</b> El docker-compose dice Postgres 16. El agente no lo comprueba porque confía en su memoria.' : '<b>Cero herramientas.</b> La respuesta estaba en la memoria.';
+      } else {
+        tool('Grep','"postgres|mysql|mongo"',['docker-compose.yml:4:    image: postgres:16']);
+        tool('Read','docker-compose.yml',['image: postgres:16','ports: ["5433:5432"]']);
+        say(L('Postgres 16, expuesto en el puerto 5433.','Postgres 16, exposed on port 5433.'));
+        msg = '<b>Búsqueda agéntica.</b> Sin memoria, el agente busca con grep y lee el fichero. Es lo que hace Claude Code de verdad: no usa RAG para el código.';
+      }
+    }
+    if (task === 'deploy'){
+      const forbid = /(nunca|no)\b[^.\n]{0,40}(desplieg|producci|prod)/.test(all) || /never[^.\n]{0,40}prod/.test(all);
+      if (forbid){
+        say(L('Tu CLAUDE.md dice que nunca despliegue a producción. ¿Preparo un PR y aviso al equipo?','Your CLAUDE.md says never to deploy to production. Shall I open a PR instead?'));
+        msg = '<b>La regla funciona.</b> El agente ni lo intenta. Las reglas de seguridad son de lo más valioso que puedes poner en CLAUDE.md.';
+      } else {
+        tool('Read','scripts/deploy.sh',['#!/bin/bash  # uso: ./deploy.sh <staging|production>']);
+        calls++; out.push(['tool','⏺ Bash(./scripts/deploy.sh production)',180]);
+        out.push(['err','  ⎿  Claude quiere ejecutar este comando. ¿Permitir? (s/n)',90]);
+        msg = '<b>Sin regla, solo te salva el sistema de permisos.</b> El agente iba a desplegar. Si trabajas en modo «aceptar todo», ya estaría en producción.';
+      }
+    }
+    const cost = 400 + calls * 750 + tokens(proj.value) + tokens(user.value);
+    return {out, calls, cost, msg};
+  }
+  const LABEL = {install:'Añade la librería zod', tests:'Ejecuta los tests', db:'¿Qué base de datos usamos?', deploy:'Despliega la rama a producción'};
+  document.querySelectorAll('#l1-tasks button').forEach(b => b.addEventListener('click', async () => {
+    if (term.busy) return;
+    const r = plan(b.dataset.t);
+    term.clear(); await term.print([...header(), ['u','> ' + LABEL[b.dataset.t],140]]);
+    await term.print(r.out);
+    callsEl.textContent = r.calls; costEl.textContent = '≈ ' + fmt(r.cost);
+    note.innerHTML = r.msg;
+  }));
+  proj.value = GOOD_P; user.value = GOOD_U; upd();
+  term.print([...header(), ['d','  Elige una tarea abajo.',0]]);
+})();
+
+/* ---------- LAB 1b ---------- */
+(function lab1b(){
+  const ids = ['hermes','agents','claude','import','cursor'];
+  const f = Object.fromEntries(ids.map(k => [k, document.getElementById('f-'+k)]));
+  function verdict(){
+    const has = k => f[k].checked;
+    f.import.disabled = !has('claude'); document.getElementById('l-import').classList.toggle('disabled', !has('claude'));
+    let h, hw;
+    if (has('hermes')) { h='.hermes.md'; hw='Es el primero de su lista. Ignora AGENTS.md, CLAUDE.md y .cursorrules aunque existan.'; }
+    else if (has('agents')) { h='AGENTS.md'; hw='No hay .hermes.md, así que gana AGENTS.md.' + (has('claude')?' CLAUDE.md se ignora: solo carga uno.':''); }
+    else if (has('claude')) { h='CLAUDE.md'; hw='No hay .hermes.md ni AGENTS.md.'; }
+    else if (has('cursor')) { h='.cursorrules'; hw='Último recurso de la lista.'; }
+    else { h='nada del proyecto'; hw='Solo su SOUL.md global.'; }
+    let c, cw;
+    if (has('claude')) {
+      if (has('import') && has('agents')) { c='CLAUDE.md + AGENTS.md (importado)'; cw='El import @AGENTS.md mete el contenido de AGENTS.md. Los dos agentes leen las mismas reglas.'; }
+      else if (has('import')) { c='CLAUDE.md'; cw='El import apunta a un AGENTS.md que no existe.'; }
+      else { c='CLAUDE.md'; cw = has('agents') ? 'Con CLAUDE.md presente, por defecto no carga AGENTS.md. Añade @AGENTS.md para compartir reglas.' : 'Su fichero de siempre.'; }
+    } else if (has('agents')) { c='AGENTS.md'; cw='Sin CLAUDE.md, las versiones recientes cargan AGENTS.md en su lugar.'; }
+    else { c='nada del proyecto'; cw = (has('hermes')||has('cursor')) ? 'No lee .hermes.md ni .cursorrules.' : 'Solo tu ~/.claude/CLAUDE.md.'; }
+    const set = (id, loads, why) => { const box = document.getElementById(id); box.querySelector('.loads').textContent = '→ ' + loads; box.querySelector('.why').textContent = why; box.className = 'agent ' + (loads.startsWith('nada') ? 'none' : 'ok'); };
+    set('v-hermes', h, hw); set('v-claude', c, cw);
+  }
+  ids.forEach(k => f[k].addEventListener('change', verdict)); verdict();
+})();
+
+/* ================= LAB 2 · Hermes ================= */
+(function lab2(){
+  const LIM = {user:1375, memory:2200};
+  const DELIM = '\n§\n';
+  const term = makeTerm(document.getElementById('l2-term'));
+  const note = document.getElementById('l2-note'), bar = document.getElementById('l2-bar');
+  let disk, snap, fresh, session, db;
+  const size = arr => arr.join(DELIM).length;
+  const API_DOC = 'API mi-tienda: GET /products (paginado, ?page, ?size, ?sort), GET /products/:id, POST /cart/items {productId, qty}, DELETE /cart/items/:id, POST /checkout {cartId, address, paymentMethod}, GET /orders, GET /orders/:id, webhooks /stripe/events con firma HMAC. '.repeat(10);
+  const MSGS = [
+    {text:'Me llamo Ana y llevo el backend de mi-tienda.', target:'user', content:'Ana. Lleva el backend de mi-tienda.', reply:'Encantado, Ana. Lo apunto para las próximas sesiones.'},
+    {text:'Prefiero respuestas cortas y sin emojis.', target:'user', content:'Prefiere respuestas cortas, sin emojis.', reply:'Entendido.'},
+    {text:'Ojo: Postgres corre en el puerto 5433, no en el 5432.', target:'memory', content:'mi-tienda: Postgres 16 en el puerto 5433 (no 5432).', reply:'Guardado. No volveré a probar el 5432.'},
+    {text:'Hemos migrado a MySQL 8 en el puerto 3306.', target:'memory', patch:{old:'Postgres 16 en el puerto 5433 (no 5432)', content:'MySQL 8 en el puerto 3306 (migrado desde Postgres)'}, reply:'Actualizado: sustituyo la nota de Postgres en lugar de añadir otra.'},
+    {text:'Arregla el test que falla en auth.spec.ts', task:true},
+    {text:'Guarda en tu memoria toda la documentación de la API.', target:'memory', content:API_DOC},
+    {text:'¿Qué hicimos con el test de auth?', search:'auth.spec.ts'},
+    {text:'¿Qué sabes de mí?', me:true}
+  ];
+  const wrap = document.getElementById('l2-msgs');
+  MSGS.forEach(m => { const b = document.createElement('button'); b.className = 'chipbtn'; b.textContent = m.text; b.onclick = () => send(m, b); wrap.appendChild(b); });
+
+  function render(){
+    ['user','memory'].forEach(t => {
+      const box = document.getElementById(t === 'user' ? 'l2-user' : 'l2-mem');
+      const n = size(disk[t]);
+      document.getElementById(t === 'user' ? 'l2-user-n' : 'l2-mem-n').textContent = fmt(n) + ' / ' + fmt(LIM[t]);
+      document.getElementById(t === 'user' ? 'l2-user-bar' : 'l2-mem-bar').style.width = Math.min(100, n/LIM[t]*100) + '%';
+      box.innerHTML = disk[t].length ? disk[t].map(e => `<div class="ent${fresh.has(e)?' new':''}">${esc(e)}</div>`).join('<div class="sep">§</div>') : '<span class="empty">(vacío)</span>';
+    });
+    document.getElementById('l2-snap').textContent =
+      '══ MEMORY (tus notas) [' + fmt(size(snap.memory)) + '/' + fmt(LIM.memory) + ' chars] ══\n' + (snap.memory.join(DELIM) || '(vacío)') +
+      '\n\n══ USER PROFILE [' + fmt(size(snap.user)) + '/' + fmt(LIM.user) + ' chars] ══\n' + (snap.user.join(DELIM) || '(vacío)');
+    bar.textContent = 'hermes — sesión ' + session;
+  }
+  const call = (name, args) => ['tool', '⚙ ' + name + ' ' + JSON.stringify(args), 200];
+  async function send(m, btn){
+    if (term.busy) return;
+    btn.classList.add('used');
+    db.push({s:session, role:'user', text:m.text});
+    const lines = [['u','❯ ' + m.text,160]];
+    let msg = '', reply = '';
+    if (m.task){
+      lines.push(call('terminal', {command:'pnpm vitest run src/auth.spec.ts'}), ['err','  ↳ FAIL  expected 401, received 500',90]);
+      lines.push(call('read_file', {path:'src/auth/middleware.ts'}), ['d','  ↳ 48 líneas',90]);
+      lines.push(call('patch', {path:'src/auth/middleware.ts'}), ['ok','  ↳ ok',90]);
+      lines.push(call('terminal', {command:'pnpm vitest run src/auth.spec.ts'}), ['ok','  ↳ PASS  8 tests',90]);
+      reply = 'Arreglado auth.spec.ts: el middleware lanzaba un error sin capturar con tokens caducados.';
+      msg = '<b>No ha escrito nada en memoria.</b> Su propia herramienta lo dice: el progreso de una tarea no va a MEMORY.md («use session_search for those»). Queda en el historial de <code>state.db</code>.';
+    } else if (m.search){
+      lines.push(call('session_search', {query:m.search, sort:'newest'}));
+      const hits = db.filter(r => r.s < session && /auth/i.test(r.text));
+      if (hits.length){
+        lines.push(['d','  ↳ SELECT … FROM messages_fts WHERE messages_fts MATCH \'auth.spec.ts\'   (simplificado)',80]);
+        hits.forEach(h => lines.push(['ok','  ↳ sesión ' + h.s + ' · ' + h.role + ': «' + h.text + '»',80]));
+        reply = 'En la sesión ' + hits[0].s + ' arreglamos auth.spec.ts: el middleware fallaba con tokens caducados.';
+        msg = '<b>Memoria episódica.</b> No estaba en MEMORY.md ni en el contexto: el agente la ha buscado en el historial con FTS5 y ha recibido los mensajes reales.';
+      } else {
+        lines.push(['d','  ↳ 0 resultados en sesiones anteriores',80]);
+        reply = 'No encuentro nada sobre ese test en sesiones anteriores.';
+        msg = 'No hay nada en sesiones <b>anteriores</b>. Pide «Arregla el test…», pulsa «Nueva sesión» y vuelve a preguntar.';
+      }
+    } else if (m.me){
+      const extra = disk.user.filter(e => !snap.user.includes(e));
+      reply = snap.user.length ? 'Según mi perfil: ' + snap.user.join(' ') : 'Mi perfil de usuario está vacío en esta sesión.';
+      if (extra.length) lines.push(['', reply, 60], ['d','(Lo que me has contado hoy lo sé por esta conversación; entrará en mi perfil en la próxima sesión.)',60]);
+      msg = extra.length ? '<b>Foto fija.</b> Lo guardado en esta sesión ya está en disco, pero el system prompt no cambia hasta la siguiente. Pulsa «Nueva sesión» y pregunta otra vez.' : '<b>Esto viene del system prompt.</b> USER.md se cargó al arrancar la sesión.';
+      if (extra.length){ db.push({s:session, role:'assistant', text:reply}); await term.print(lines); render(); note.innerHTML = msg; return; }
+    } else if (m.patch){
+      const t = m.target, i = disk[t].findIndex(e => e.includes(m.patch.old));
+      if (i >= 0){
+        lines.push(call('memory', {target:t, operations:[{action:'patch', old_text:m.patch.old, content:m.patch.content}]}));
+        disk[t][i] = disk[t][i].replace(m.patch.old, m.patch.content); fresh.add(disk[t][i]);
+        lines.push(['ok','  ↳ ok · memory ' + fmt(size(disk[t])) + '/' + fmt(LIM[t]) + ' chars',80]);
+        reply = m.reply; msg = '<b>patch, no add.</b> Corregir en lugar de acumular evita que la memoria tenga dos datos contradictorios.';
+      } else {
+        const c = 'mi-tienda: ' + m.patch.content + '.';
+        lines.push(call('memory', {target:t, operations:[{action:'add', content:c}]}));
+        disk[t].push(c); fresh.add(c);
+        lines.push(['ok','  ↳ ok · memory ' + fmt(size(disk[t])) + '/' + fmt(LIM[t]) + ' chars',80]);
+        reply = 'Anotado.'; msg = 'Como no había nota de Postgres, la ha añadido. Prueba primero el mensaje del puerto 5433 y después este.';
+      }
+    } else {
+      const t = m.target, c = m.content, next = size([...disk[t], c]);
+      lines.push(call('memory', {target:t, operations:[{action:'add', content: c.length > 90 ? c.slice(0,90) + '…' : c}]}));
+      if (disk[t].includes(c)){
+        lines.push(['d','  ↳ ya existe una entrada idéntica; no se duplica',80]); reply = 'Ya lo tenía apuntado.'; msg = 'No duplica entradas.';
+      } else if (next > LIM[t]){
+        lines.push(['err','  ↳ rejected: would put ' + t + ' at ' + fmt(next) + '/' + fmt(LIM[t]) + ' chars: free at least ' + fmt(next - LIM[t]) + ' chars',80]);
+        reply = 'Eso no cabe en mi memoria, y además no debería estar ahí: la cargo en cada turno. Te propongo guardarla como skill o dejarla en docs/api.md del repo y leerla cuando haga falta.';
+        msg = '<b>Rechazado por el límite.</b> Es el formato real del error de Hermes. El límite obliga a decidir: la memoria es para hechos que valen en todas las sesiones, no para documentación.';
+      } else {
+        disk[t].push(c); fresh.add(c);
+        lines.push(['ok','  ↳ ok · ' + t + ' ' + fmt(size(disk[t])) + '/' + fmt(LIM[t]) + ' chars',80]);
+        reply = m.reply; msg = 'Escrito en disco (<code>' + (t==='user'?'USER.md':'MEMORY.md') + '</code>), pero mira el system prompt de la derecha: <b>no cambia hasta la próxima sesión</b>.';
+      }
+    }
+    lines.push(['', reply, 60]);
+    db.push({s:session, role:'assistant', text:reply});
+    await term.print(lines);
+    render(); note.innerHTML = msg;
+  }
+  async function newSession(first){
+    if (term.busy) return;
+    if (!first) session++;
+    snap = {user:[...disk.user], memory:[...disk.memory]}; fresh = new Set();
+    term.clear(); render();
+    document.querySelectorAll('#l2-msgs .chipbtn').forEach(b => b.classList.remove('used'));
+    await term.print([['box','⚕ Hermes Agent · sesión ' + session,0],['d','  memoria cargada: user ' + fmt(size(snap.user)) + '/' + fmt(LIM.user) + ' · memory ' + fmt(size(snap.memory)) + '/' + fmt(LIM.memory) + ' chars',0],['d','  historial: ' + db.length + ' mensajes en state.db',40]]);
+    if (!first) note.innerHTML = '<b>Sesión ' + session + '.</b> La conversación anterior ya no está en el contexto, pero el system prompt trae la memoria guardada y <code>state.db</code> conserva el historial.';
+  }
+  function reset(){ disk = {user:[], memory:[]}; snap = {user:[], memory:[]}; fresh = new Set(); session = 1; db = []; newSession(true); note.innerHTML = 'Empieza presentándote. Luego cuéntale lo del puerto de Postgres y pulsa «Nueva sesión».'; }
+  document.getElementById('l2-new').onclick = () => newSession(false);
+  document.getElementById('l2-reset').onclick = () => { if (!term.busy) reset(); };
+  reset();
+})();
+
+/* ================= LAB 3 · RAG ================= */
+(function lab3(){
+  const DOCS = [
+    {id:'rag', title:'Apuntes: RAG', c:'var(--teal)', text:'RAG es la técnica de recuperar fragmentos de documentos relevantes para una pregunta y añadirlos al prompt antes de que el LLM genere la respuesta. Se popularizó a partir del paper de Lewis et al. de Facebook AI en 2020. En la ingesta se trocean los documentos en chunks de entre 500 y 1000 tokens con solapamiento. Cada chunk se convierte en un vector numérico con un modelo de embeddings y se guarda en una base vectorial como pgvector, Chroma, Qdrant o LanceDB. En la consulta la pregunta también se convierte en vector y se buscan los k chunks más cercanos por similitud coseno. Los chunks recuperados se pegan en el prompt y el LLM responde. Mejoras habituales: búsqueda híbrida que combina BM25 para palabras exactas con vectores, y re-ranking con un segundo modelo. Limitaciones: el conocimiento no se acumula, cada pregunta vuelve a buscar desde cero. Un chunk aislado pierde el contexto del documento. La base vectorial no es legible por humanos. Los agentes de código como Claude Code apenas usan RAG vectorial sobre el código: prefieren la búsqueda agéntica con grep y glob, leyendo los ficheros reales, así la información nunca está desactualizada.'},
+    {id:'hermes', title:'Apuntes: cómo recuerda Hermes Agent', c:'var(--amber)', text:'Hermes Agent es un agente open source de Nous Research. Su memoria combina varias capas. El fichero MEMORY.md guarda notas del propio agente sobre el entorno, convenciones y peculiaridades de herramientas. Su límite es de 2200 caracteres. El fichero USER.md guarda lo que el agente sabe del usuario, su estilo y preferencias. Su límite es de 1375 caracteres. Ambos se inyectan en el system prompt como una foto fija al empezar la sesión. Los límites obligan al agente a curar la memoria en lugar de acumular. Todas las conversaciones se guardan en SQLite en el fichero state.db con un índice de texto completo FTS5. Con la herramienta session_search el agente busca en sesiones pasadas y recibe los mensajes reales. Hermes también crea skills a partir de tareas resueltas. Al arrancar carga un único fichero de contexto de proyecto: primero .hermes.md, después AGENTS.md, después CLAUDE.md y por último .cursorrules.'},
+    {id:'claude', title:'Apuntes: CLAUDE.md y auto memory', c:'var(--indigo)', text:'Claude Code de Anthropic lee ficheros CLAUDE.md al arrancar y los mete en el contexto. Hay uno de usuario en la carpeta personal, uno de proyecto compartido con git y otros en subcarpetas. El comando /init genera un CLAUDE.md analizando el repositorio y /memory lo abre para editarlo. Un CLAUDE.md puede importar otros ficheros con la sintaxis arroba. AGENTS.md es un formato abierto equivalente pensado para que distintos agentes lean las mismas instrucciones. Además Claude Code puede escribir su propia auto memory: un índice MEMORY.md que se carga en cada sesión y un fichero por recuerdo, clasificados como user, feedback, project o reference. Es memoria que escribe el agente y conviene revisarla porque puede quedar obsoleta. Las skills y los slash commands son memoria procedimental.'},
+    {id:'wiki', title:'Apuntes: LLM-Wiki de Karpathy', c:'var(--rose)', text:'LLM-Wiki es un patrón publicado por Andrej Karpathy en abril de 2026. En lugar de recuperar trozos en cada pregunta, el LLM compila las fuentes una vez en una wiki de Markdown enlazada y la mantiene. El conocimiento se acumula. Tiene tres capas: raw con las fuentes inmutables, wiki con las páginas que escribe solo el LLM, y un esquema en AGENTS.md o CLAUDE.md con las reglas. Hay tres operaciones: ingest para incorporar una fuente y actualizar todas las páginas afectadas, query para responder citando páginas y guardar síntesis, y lint para buscar contradicciones, páginas huérfanas y enlaces rotos. Obsidian sirve como visor. Karpathy lo relaciona con el Memex de Vannevar Bush.'}
+  ];
+  const PRESETS = [
+    {q:'¿Cuántos caracteres admite USER.md en Hermes?', needs:[{doc:'hermes', has:'1375', label:'El límite de USER.md (apuntes de Hermes)'}]},
+    {q:'¿En qué se parecen MEMORY.md de Hermes y la auto memory de Claude Code?', needs:[{doc:'hermes', has:'memory.md', label:'Qué es MEMORY.md en Hermes'},{doc:'claude', has:'auto memory', label:'Qué es la auto memory de Claude Code'}]},
+    {q:'¿Por qué Claude Code no usa RAG para buscar en el código?', needs:[{doc:'rag', has:'grep', label:'La búsqueda agéntica con grep (apuntes de RAG)'}]},
+    {q:'¿Qué ventaja tiene LLM-Wiki frente a RAG?', needs:[{doc:'wiki', has:'se acumula', label:'Que en LLM-Wiki el conocimiento se acumula'},{doc:'rag', has:'no se acumula', label:'Que en RAG no se acumula'}]},
+    {q:'¿Dónde guarda Hermes las conversaciones antiguas?', needs:[{doc:'hermes', has:'state.db', label:'state.db con FTS5 (apuntes de Hermes)'}]}
+  ];
+  const STOP = new Set('de la el en y a los las un una que se con por para del al es su o como mas lo le ya no si sus sobre este esta pero entre tambien cada que cuantos cual donde por que'.split(' '));
+  const norm = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const toks = s => norm(s).replace(/[^a-z0-9.\/_ -]/g,' ').split(/\s+/).map(w => w.replace(/^[.\-\/]+|[.\-\/]+$/g,'')).filter(w => w.length > 1 && !STOP.has(w));
+  const D = 256;
+  function hash(str){ let h = 2166136261; for (let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0); }
+  function embed(text){
+    const v = new Float32Array(D);
+    toks(text).forEach(w => { const p = '#' + w + '#'; for (let i=0;i<p.length-2;i++){ const h = hash(p.slice(i,i+3)); v[h % D] += (h & 1) ? 1 : -1; } v[hash(w) % D] += 2; });
+    let n = 0; for (let i=0;i<D;i++) n += v[i]*v[i]; n = Math.sqrt(n) || 1; for (let i=0;i<D;i++) v[i] /= n; return v;
+  }
+  const cos = (a,b) => { let s=0; for (let i=0;i<D;i++) s += a[i]*b[i]; return s; };
+  const $ = id => document.getElementById(id);
+  const q = $('l3-q'), size = $('l3-size'), ov = $('l3-ov'), kk = $('l3-k'), ctx = $('l3-ctx');
+  let method = 'hyb', preset = PRESETS[1];
+  q.value = preset.q;
+  PRESETS.forEach(p => { const b = document.createElement('button'); b.className = 'chipbtn'; b.textContent = p.q; b.onclick = () => { preset = p; q.value = p.q; run(); }; $('l3-presets').appendChild(b); });
+  q.addEventListener('input', () => { preset = PRESETS.find(p => p.q === q.value) || null; run(); });
+  [size, ov, kk, ctx].forEach(x => x.addEventListener('input', run));
+  document.querySelectorAll('#l3-method button').forEach(b => b.onclick = () => { method = b.dataset.m; document.querySelectorAll('#l3-method button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); run(); });
+  $('l3-legend').innerHTML = DOCS.map(d => `<span><i style="background:${d.c}"></i>${esc(d.title)}</span>`).join('');
+
+  function chunk(){
+    const S = +size.value, O = Math.min(+ov.value, S-5), out = [];
+    DOCS.forEach(d => { const w = d.text.split(/\s+/); for (let i=0; i<w.length; i += S-O){ out.push({doc:d, text:w.slice(i, i+S).join(' ')}); if (i+S >= w.length) break; } });
+    return out;
+  }
+  function run(){
+    $('l3-size-o').textContent = size.value + ' palabras'; $('l3-ov-o').textContent = ov.value + ' palabras'; $('l3-k-o').textContent = kk.value + (kk.value==='1'?' chunk':' chunks');
+    const chunks = chunk();
+    chunks.forEach(c => { c.idx = (ctx.checked ? c.doc.title + '. ' : '') + c.text; c.t = toks(c.idx); c.v = embed(c.idx); });
+    const N = chunks.length, avg = chunks.reduce((a,c) => a + c.t.length, 0)/N;
+    const df = {}; chunks.forEach(c => new Set(c.t).forEach(w => df[w] = (df[w]||0)+1));
+    const qt = toks(q.value), qv = embed(q.value);
+    chunks.forEach(c => {
+      const tf = {}; c.t.forEach(w => tf[w] = (tf[w]||0)+1);
+      c.bm = qt.reduce((s,w) => { if (!tf[w]) return s; const idf = Math.log(1 + (N - df[w] + .5)/(df[w] + .5)); return s + idf * (tf[w]*2.2)/(tf[w] + 1.2*(1 - .75 + .75*c.t.length/avg)); }, 0);
+      c.vs = cos(qv, c.v);
+    });
+    [['bm','r_bm'],['vs','r_vs']].forEach(([k,r]) => [...chunks].sort((a,b) => b[k]-a[k]).forEach((c,i) => c[r] = i+1));
+    chunks.forEach(c => c.hy = 1/(60 + c.r_bm) + 1/(60 + c.r_vs));
+    const key = method === 'bm25' ? 'bm' : method === 'vec' ? 'vs' : 'hy';
+    const top = [...chunks].sort((a,b) => b[key]-a[key]).slice(0, +kk.value);
+    $('l3-nchunks').textContent = N;
+    $('l3-chunks').innerHTML = chunks.map(c => `<span style="--c:${c.doc.c}" class="${top.includes(c)?'hit':''}" title="${esc(c.doc.title + ': ' + c.text.slice(0,140))}…"></span>`).join('');
+    const re = qt.length ? new RegExp('(' + qt.map(w => w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|') + ')', 'g') : null;
+    const hl = s => { if (!re) return esc(s); const n = norm(s); let out = '', last = 0; n.replace(re, (m, _g, off) => { out += esc(s.slice(last, off)) + '<mark>' + esc(s.slice(off, off+m.length)) + '</mark>'; last = off + m.length; return m; }); return out + esc(s.slice(last)); };
+    const label = c => method === 'bm25' ? 'BM25 ' + c.bm.toFixed(2) : method === 'vec' ? 'coseno ' + c.vs.toFixed(3) : 'RRF ' + c.hy.toFixed(4) + ' (BM25 #' + c.r_bm + ' · vec #' + c.r_vs + ')';
+    $('l3-hits').innerHTML = top.map((c,i) => `<div class="hit" style="--c:${c.doc.c}"><div class="hit-h"><span>#${i+1} · ${esc(c.doc.title)}</span><span>${label(c)}</span></div><div>${ctx.checked ? '<span class="muted">' + esc(c.doc.title) + '.</span> ' : ''}${hl(c.text)}</div><div class="vec" aria-hidden="true">${Array.from(c.v.slice(0,48)).map(x => `<i style="opacity:${Math.min(1, Math.abs(x)*5).toFixed(2)}"></i>`).join('')}</div></div>`).join('');
+    let needsHtml = '', allOk = true;
+    if (preset){
+      preset.needs.forEach(n => { const ok = top.some(c => c.doc.id === n.doc && norm(c.text).includes(norm(n.has))); allOk = allOk && ok; needsHtml += `<div><span class="${ok?'ok':'no'}">${ok?'✓':'✗'}</span> ${esc(n.label)}</div>`; });
+    } else needsHtml = '<div class="muted">Pregunta libre: comprueba tú si los chunks recuperados bastan.</div>';
+    $('l3-needs').innerHTML = needsHtml;
+    const prompt = 'Responde usando SOLO el contexto. Si no basta, dilo.\n\n' + top.map((c,i) => `[${i+1}] (${c.doc.title})\n${c.text}`).join('\n\n') + '\n\nPregunta: ' + q.value;
+    $('l3-prompt').textContent = prompt; $('l3-tok').textContent = fmt(tokens(prompt));
+    let msg;
+    if (!preset) msg = 'Prueba a cambiar el método: BM25 encuentra palabras exactas (USER.md, 1375); los vectores encuentran palabras parecidas aunque no sean idénticas.';
+    else if (allOk) msg = '<b>El contexto basta.</b> Ahora baja el tamaño del chunk o el top k y mira cuándo se rompe. Y fíjate en que nada de esto queda guardado: la próxima pregunta vuelve a empezar de cero.';
+    else msg = preset.needs.length > 1 ? '<b>Falta información.</b> La respuesta necesita trozos de ' + preset.needs.length + ' documentos distintos y el top k no los recupera todos. Sube k, activa Contextual Retrieval o cambia de método. Es la limitación de fondo de RAG: hay que encontrar todas las piezas en cada pregunta.' : '<b>Falta información.</b> El trozo con la respuesta no está entre los recuperados. Prueba otro método, otro tamaño de chunk o activa Contextual Retrieval.';
+    $('l3-note').innerHTML = msg;
+  }
+  run();
+})();
+
+/* ================= LAB 4 · LLM-Wiki ================= */
+(function lab4(){
+  const N = (id,label,type,x,y,r) => ({id,label,type,hx:x,hy:y,r});
+  const STEPS = [
+    { title:'Apuntes: RAG', file:'raw/2026-11-01-apuntes-rag.md', lines:42,
+      nodes:[N('f1','apuntes-rag','fuente',110,215,'Resumen de los apuntes de clase sobre RAG: pipeline, mejoras y limitaciones.'),N('rag','rag','concepto',225,205,'Recuperar trozos relevantes y añadirlos al prompt antes de generar.'),N('chunking','chunking','concepto',185,90,'Trocear documentos en fragmentos de 500–1.000 tokens con solapamiento.'),N('embeddings','embeddings','concepto',295,110,'Vectores numéricos que representan el significado de un texto.'),N('bv','base-vectorial','concepto',150,330,'Almacén de embeddings con búsqueda por similitud: pgvector, Chroma, Qdrant.'),N('bh','busqueda-hibrida','concepto',285,320,'Combina BM25 (palabras exactas) con vectores (significado).'),N('graphrag','graphrag','concepto',75,120,'Variante de Microsoft que construye un grafo de entidades. Cobertura limitada en las fuentes.'),N('ba','busqueda-agentica','concepto',365,225,'El agente busca con grep/glob y lee ficheros reales en vez de usar vectores.'),N('cc','claude-code','entidad',455,150,'Agente de código de Anthropic que trabaja en la terminal.')],
+      edges:[['f1','rag'],['f1','graphrag'],['f1','bv'],['f1','cc'],['rag','chunking'],['rag','embeddings'],['rag','bv'],['rag','bh'],['rag','graphrag'],['rag','ba'],['embeddings','bv'],['ba','cc']],
+      update:{}, narr:'Una sola fuente ha generado 9 páginas enlazadas.' },
+    { title:'Apuntes: memoria en Hermes', file:'raw/2026-11-05-apuntes-memoria-hermes.md', lines:38,
+      nodes:[N('f2','apuntes-hermes','fuente',610,345,'Resumen de los apuntes sobre las capas de memoria de Hermes Agent.'),N('hermes','hermes-agent','entidad',505,290,'Agente open source de Nous Research con memoria en varias capas.'),N('mem','memory-md','concepto',620,240,'Notas del agente sobre el entorno. Límite: 2.200 caracteres, foto fija por sesión.'),N('user','user-md','concepto',655,300,'Perfil del usuario que mantiene el agente. Límite: 1.375 caracteres.'),N('ses','busqueda-sesiones','concepto',395,360,'Historial en state.db con FTS5; session_search devuelve mensajes reales.'),N('skills','skills','concepto',520,390,'Memoria procedimental: instrucciones reutilizables que el agente crea y carga.'),N('agents','agents-md','concepto',470,55,'Formato abierto de instrucciones para agentes. Hermes lo prioriza sobre CLAUDE.md.'),N('soul','soul-md','concepto',640,395,'Identidad del agente Hermes; se carga siempre.')],
+      edges:[['f2','hermes'],['f2','mem'],['hermes','mem'],['hermes','user'],['hermes','ses'],['hermes','skills'],['hermes','agents'],['hermes','soul'],['mem','user'],['ses','bh'],['ses','rag']],
+      update:{rag:'Añadida la sección «Alternativas a RAG en agentes»: la búsqueda de sesiones de Hermes.', bh:'La búsqueda FTS5 de Hermes es búsqueda de texto completo, de la misma familia que BM25.'},
+      narr:'8 páginas nuevas, y además ha reescrito rag y busqueda-hibrida: la búsqueda FTS5 de Hermes es texto completo, como BM25.' },
+    { title:'Apuntes: CLAUDE.md y auto memory', file:'raw/2026-11-10-apuntes-claude-md.md', lines:41,
+      nodes:[N('f3','apuntes-claude-md','fuente',615,70,'Resumen de los apuntes sobre CLAUDE.md, AGENTS.md y auto memory.'),N('cmd','claude-md','concepto',560,140,'Fichero de instrucciones que Claude Code carga al arrancar; admite imports con @.'),N('auto','auto-memory','concepto',660,170,'Memoria que escribe Claude Code: índice MEMORY.md + un fichero por recuerdo.'),N('slash','slash-commands','concepto',395,95,'Comandos reutilizables en .claude/commands: memoria procedimental.')],
+      edges:[['f3','cmd'],['f3','auto'],['f3','agents'],['cmd','cc'],['cmd','agents'],['auto','cc'],['auto','mem'],['slash','cc'],['slash','skills']],
+      update:{cc:'Añadida la sección «Memoria»: CLAUDE.md, auto memory y slash commands.', agents:'Claude Code también lo entiende: puede importarlo con @AGENTS.md.', skills:'Equivalente en Claude Code: skills y slash commands.', mem:'Comparación: la auto memory de Claude Code también usa un índice MEMORY.md.'},
+      narr:'Solo 4 páginas nuevas, pero 4 páginas existentes se reescriben. Cuanto más crece la wiki, más trabajo es actualizar y menos es crear.' }
+  ];
+  const QUERIES = [
+    { q:'¿Qué limitaciones tiene RAG?', needs:['rag'], node:N('syn1','limitaciones-rag','sintesis',150,40,'Síntesis: RAG no acumula, los chunks pierden contexto y los vectores no se pueden auditar.'),
+      edges:[['syn1','rag'],['syn1','chunking'],['syn1','bv'],['syn1','ba']], read:['rag','chunking','base-vectorial'], answer:'RAG no acumula conocimiento, los chunks pierden contexto y los vectores no se pueden leer ni corregir a mano.' },
+    { q:'¿Por qué Claude Code no usa RAG para el código?', needs:['ba','cc'], node:N('syn2','rag-vs-busqueda-agentica','sintesis',380,300,'Síntesis: por qué la búsqueda agéntica gana a los vectores en código.'),
+      edges:[['syn2','rag'],['syn2','ba'],['syn2','cc']], read:['busqueda-agentica','claude-code','rag'], answer:'Porque buscar con grep y leer los ficheros reales nunca da información desactualizada.' },
+    { q:'¿En qué se parecen la memoria de Hermes y la de Claude Code?', needs:['mem','auto'], node:N('syn3','memoria-hermes-vs-claude','sintesis',540,215,'Síntesis: ambos usan un índice MEMORY.md escrito por el agente; Hermes con límites estrictos.'),
+      edges:[['syn3','mem'],['syn3','auto'],['syn3','agents'],['syn3','hermes'],['syn3','cc']], read:['memory-md','auto-memory','agents-md'], answer:'Las dos usan un índice MEMORY.md que entra en cada sesión y que escribe el propio agente.' }
+  ];
+  const LINT = { node:N('ctx','ventana-de-contexto','concepto',330,160,'Concepto transversal: todo sistema de memoria decide qué entra en la ventana de contexto.'), edges:[['ctx','rag'],['ctx','mem'],['ctx','cmd']] };
+  const FOLDER = {fuente:'fuentes', concepto:'conceptos', entidad:'entidades', sintesis:'sintesis'};
+  const gE = document.getElementById('g-edges'), gN = document.getElementById('g-nodes');
+  const bIngest = document.getElementById('b-ingest'), bQuery = document.getElementById('b-query'), bLint = document.getElementById('b-lint');
+  const narr = document.getElementById('narr'), pLog = document.getElementById('p-log'), pTerm = document.getElementById('p-term'), pPage = document.getElementById('p-page');
+  const tabs = document.querySelectorAll('#lab4 .side .tabs button');
+  let nodes, edges, step, updates, asked, linted, logLines, sel, running = false;
+
+  function showPanel(p){ tabs.forEach(b => b.setAttribute('aria-selected', String(b.dataset.p === p))); pPage.hidden = p !== 'page'; pTerm.hidden = p !== 'term'; pLog.hidden = p !== 'log'; }
+  tabs.forEach(b => b.onclick = () => showPanel(b.dataset.p));
+  function addNode(n, src){ if (nodes.has(n.id)) return; nodes.set(n.id, {...n, x:n.hx+(Math.random()-.5)*20, y:n.hy+(Math.random()-.5)*20, vx:0, vy:0, sources: src ? [src] : [], notes:[]}); }
+  function addEdges(list){ list.forEach(([a,b]) => { if (nodes.has(a) && nodes.has(b) && !edges.some(e => (e.a===a&&e.b===b)||(e.a===b&&e.b===a))) edges.push({a,b,fresh:true}); }); }
+  function tick(){
+    const arr = [...nodes.values()];
+    for (let i=0;i<arr.length;i++) for (let j=i+1;j<arr.length;j++){
+      const p=arr[i], q=arr[j]; let dx=p.x-q.x, dy=p.y-q.y; const d2=dx*dx+dy*dy+0.01; if (d2>40000) continue;
+      const fr = 900/d2, d = Math.sqrt(d2); dx/=d; dy/=d; p.vx+=dx*fr; p.vy+=dy*fr; q.vx-=dx*fr; q.vy-=dy*fr; }
+    edges.forEach(e => { const p=nodes.get(e.a), q=nodes.get(e.b); const dx=q.x-p.x, dy=q.y-p.y, d=Math.sqrt(dx*dx+dy*dy)||1; const k=(d-85)*0.012; p.vx+=dx/d*k; p.vy+=dy/d*k; q.vx-=dx/d*k; q.vy-=dy/d*k; });
+    arr.forEach(n => { n.vx+=(n.hx-n.x)*0.02; n.vy+=(n.hy-n.y)*0.02; n.vx*=0.78; n.vy*=0.78; n.x+=n.vx; n.y+=n.vy; n.x=Math.max(40,Math.min(660,n.x)); n.y=Math.max(25,Math.min(410,n.y)); });
+  }
+  const degree = id => edges.filter(e => e.a===id||e.b===id).length;
+  const neighbors = id => edges.filter(e => e.a===id||e.b===id).map(e => nodes.get(e.a===id?e.b:e.a));
+  function render(){
+    gE.textContent=''; gN.textContent='';
+    edges.forEach(e => { const p=nodes.get(e.a), q=nodes.get(e.b); gE.appendChild(el('line',{x1:p.x,y1:p.y,x2:q.x,y2:q.y,class:'g-edge'+(e.fresh?' fresh':'')})); });
+    nodes.forEach(n => {
+      const g = el('g',{class:'g-node '+n.type+(sel===n.id?' sel':''), transform:`translate(${n.x.toFixed(1)},${n.y.toFixed(1)})`, tabindex:'0', role:'button', 'aria-label':'Abrir página ' + n.label});
+      const r = Math.min(7+degree(n.id)*1.3, 16);
+      if (n.pulse) g.appendChild(el('circle',{class:'ring',r:(r+5).toFixed(1),cx:0,cy:0}));
+      g.appendChild(el('circle',{class:'core',r:r.toFixed(1),cx:0,cy:0}));
+      const t = el('text',{x:0,y:(r+13).toFixed(1),'text-anchor':'middle'}); t.textContent=n.label; g.appendChild(t);
+      g.addEventListener('click', () => openPage(n.id)); g.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' '){ e.preventDefault(); openPage(n.id); } });
+      gN.appendChild(g);
+    });
+  }
+  function settle(){
+    if (reduce){ for(let i=0;i<260;i++) tick(); render(); return; }
+    let f=0; (function loop(){ tick(); if (f%2===0) render(); if (++f<160) requestAnimationFrame(loop); else render(); })();
+  }
+  function openPage(id){
+    const n = nodes.get(id); if (!n) return; sel = id; render(); showPanel('page');
+    const fm = `---\ntipo: ${n.type}\nresumen: ${n.r}\nfuentes: [${n.sources.join(', ')}]\nactualizado: 2026-11-17\n---`;
+    pPage.innerHTML = `<span class="pane-title">wiki/${FOLDER[n.type]}/${esc(n.label)}.md</span><div class="fm">${esc(fm)}</div><h4>${esc(n.label)}</h4><p>${esc(n.r)}</p>` +
+      n.notes.map(x => `<div class="upd"><b>Reescrita al ingerir [[${esc(x.src)}]]:</b> ${esc(x.text)}</div>`).join('') +
+      `<b style="font-family:var(--f-display)">Relacionado</b><ul>${neighbors(id).map(m => `<li><button class="wl" data-id="${m.id}">[[${esc(m.label)}]]</button></li>`).join('')}</ul>`;
+    pPage.querySelectorAll('.wl').forEach(b => b.onclick = () => openPage(b.dataset.id));
+  }
+  function clearFresh(){ nodes.forEach(n => n.pulse=false); edges.forEach(e => e.fresh=false); }
+  const nextQuery = () => QUERIES.find(x => !asked.has(x.node.id) && x.needs.every(id => nodes.has(id)));
+  function stats(){
+    document.getElementById('st-src').textContent = step;
+    document.getElementById('st-pages').textContent = nodes.size;
+    document.getElementById('st-links').textContent = edges.length;
+    document.getElementById('st-upd').textContent = updates;
+    pLog.textContent = '# Log de la wiki\n\n' + logLines.join('\n\n'); pLog.scrollTop = pLog.scrollHeight;
+    bIngest.disabled = running || step >= STEPS.length;
+    bIngest.textContent = step >= STEPS.length ? 'Todo ingerido' : '/ingest fuente ' + (step+1);
+    const nq = nextQuery();
+    bQuery.disabled = running || !nq;
+    bQuery.textContent = nq ? '/query ' + nq.q : (asked.size < QUERIES.length ? '/query (ingiere más fuentes)' : 'Preguntas hechas');
+    bLint.disabled = running || linted;
+  }
+  async function stream(lines){
+    pTerm.textContent = ''; showPanel('term');
+    for (const l of lines){ pTerm.textContent += l + '\n'; pTerm.scrollTop = pTerm.scrollHeight; await wait(120); }
+  }
+  const path = n => 'wiki/' + FOLDER[n.type] + '/' + n.label + '.md';
+  function ingestData(i){
+    const s = STEPS[i], src = s.nodes[0].label; clearFresh();
+    s.nodes.forEach(n => addNode(n, src)); addEdges(s.edges);
+    Object.entries(s.update).forEach(([id, text]) => { const n = nodes.get(id); if (n){ n.pulse = true; n.notes.push({src, text}); if (!n.sources.includes(src)) n.sources.push(src); } });
+    updates += Object.keys(s.update).length; step = i+1;
+    logLines.push(`## [2026-11-17] ingest | ${s.title}\n- Páginas creadas: ${s.nodes.map(n=>'[['+n.label+']]').join(', ')}\n- Páginas actualizadas: ${Object.keys(s.update).map(id=>'[['+nodes.get(id).label+']]').concat('[[index]]').join(', ')}`);
+  }
+  async function doIngest(){
+    if (running || step >= STEPS.length) return; running = true; stats();
+    const s = STEPS[step], upd = Object.keys(s.update).map(id => nodes.get(id));
+    const lines = ['> /ingest ' + s.file, '', '⏺ Read(' + s.file + ')', '  ⎿  Read ' + s.lines + ' lines', '⏺ Read(wiki/index.md)'];
+    upd.forEach(n => lines.push('⏺ Read(' + path(n) + ')'));
+    s.nodes.forEach(n => lines.push('⏺ Write(' + path(n) + ')'));
+    upd.forEach((n,i) => lines.push('⏺ Edit(' + path(n) + ')', '  ⎿  Updated with ' + (2 + i % 3) + ' additions'));
+    lines.push('⏺ Edit(wiki/index.md)', '⏺ Edit(wiki/log.md)', '', '⏺ Ingerida «' + s.title + '»: ' + s.nodes.length + ' páginas nuevas, ' + upd.length + ' reescritas.');
+    await stream(lines);
+    ingestData(step); running = false; stats(); settle();
+    narr.textContent = 'Fuente ' + step + ': ' + s.narr + (upd.length ? ' Pulsa un nodo con anillo para ver qué cambió.' : '');
+  }
+  async function doQuery(){
+    const Q = nextQuery(); if (running || !Q) return; running = true; stats();
+    const read = Q.read.map(l => [...nodes.values()].find(x => x.label===l)).filter(Boolean);
+    await stream(['> /query ' + Q.q, '', '⏺ Read(wiki/index.md)', ...read.map(n => '⏺ Read(' + path(n) + ')'), '', '⏺ ' + Q.answer + ' ' + Q.read.map(l=>'[['+l+']]').join(' '), '', '  ¿La guardo como síntesis? → sí', '⏺ Write(wiki/sintesis/' + Q.node.label + '.md)', '⏺ Edit(wiki/index.md)', '⏺ Edit(wiki/log.md)']);
+    clearFresh(); addNode(Q.node, 'query'); addEdges(Q.edges); asked.add(Q.node.id);
+    read.forEach(n => n.pulse = true);
+    logLines.push(`## [2026-11-17] query | ${Q.q}\n- Leídas: [[index]], ${Q.read.map(l=>'[['+l+']]').join(', ')}\n- Guardada como: [[${Q.node.label}]]`);
+    running = false; stats(); settle();
+    narr.textContent = `El agente leyó index.md y ${read.length} páginas (anillos ámbar), respondió con citas y guardó la respuesta como página de síntesis (rosa). Tu pregunta también hace crecer la wiki.`;
+  }
+  async function doLint(){
+    if (running || linted) return; running = true; stats();
+    const targets = LINT.edges.filter(([,b]) => nodes.has(b));
+    const orph = [...nodes.values()].filter(n => degree(n.id) <= 1).map(n => n.label);
+    await stream(['> /lint', '', '⏺ Glob(wiki/**/*.md)', '  ⎿  Found ' + nodes.size + ' files', '⏺ Grep("\\[\\[" en wiki/)', '⏺ Grep("ventana de contexto" en wiki/)', '  ⎿  ' + targets.length + ' páginas lo mencionan', '', '⏺ Informe de salud:', '  · Concepto sin página propia: «ventana de contexto» (' + targets.length + ' menciones)', '  · Páginas poco enlazadas: ' + (orph.length ? orph.join(', ') : 'ninguna'), '  · Cobertura limitada: [[graphrag]] solo tiene una fuente', '  · Sugerencia: ingerir el gist original de Karpathy', '', '  ¿Creo la página que falta? → sí', '⏺ Write(wiki/conceptos/ventana-de-contexto.md)', '⏺ Edit(wiki/index.md)', '⏺ Edit(wiki/log.md)']);
+    clearFresh(); linted = true;
+    addNode(LINT.node, 'lint'); addEdges(targets);
+    logLines.push(`## [2026-11-17] lint | Revisión de salud\n- Concepto sin página: «ventana de contexto» (${targets.length} menciones) → creada [[ventana-de-contexto]]\n- Poco enlazadas: ${orph.length ? orph.join(', ') : 'ninguna'}\n- Sugerencia: añadir el gist original de Karpathy`);
+    running = false; stats(); settle();
+    narr.textContent = `/lint encontró un concepto mencionado en ${targets.length} páginas que no tenía página propia y la creó. También señala páginas poco enlazadas y sugiere qué fuente añadir.`;
+  }
+  function reset(){
+    if (running) return;
+    nodes = new Map(); edges = []; step = 0; updates = 0; asked = new Set(); linted = false; logLines = []; sel = 'rag';
+    ingestData(0); clearFresh();
+    for (let i=0;i<260;i++) tick();
+    pTerm.textContent = '> /ingest raw/2026-11-01-apuntes-rag.md\n\n⏺ Read(raw/2026-11-01-apuntes-rag.md)\n  ⎿  Read 42 lines\n⏺ Write(wiki/fuentes/apuntes-rag.md)\n⏺ Write(wiki/conceptos/rag.md)\n… 7 páginas más\n⏺ Edit(wiki/index.md)\n⏺ Edit(wiki/log.md)';
+    openPage('rag');
+    narr.textContent = 'La fuente 1 (apuntes de RAG) ya está ingerida: una sola fuente ha generado 9 páginas enlazadas. Pulsa un nodo para leer su página.';
+    stats();
+  }
+  bIngest.onclick = doIngest; bQuery.onclick = doQuery; bLint.onclick = doLint;
+  document.getElementById('b-reset').onclick = reset;
+  reset();
+})();
+
+/* ---------- COPIAR ---------- */
+document.querySelectorAll('.code .copy').forEach(btn => btn.addEventListener('click', () => {
+  const pre = btn.parentElement.querySelector('pre');
+  const text = pre.innerText.split('\n').map(l => l.replace(/\s+#.*$/,'')).join('\n').trim();
+  const done = () => { btn.textContent = 'Copiado'; setTimeout(() => btn.textContent = 'Copiar', 1600); };
+  const fallback = () => { const r=document.createRange(); r.selectNodeContents(pre); const s=getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent='Selecciona y copia'; };
+  try { navigator.clipboard.writeText(text).then(done, fallback); } catch(e){ fallback(); }
+}));
+
+/* ---------- QUIZ ---------- */
+const QS = [
+  {q:'Cierras Claude Code y lo vuelves a abrir. ¿Qué recuerda de la conversación anterior por sí solo?', o:['Todo, el modelo aprende de cada sesión','Nada: solo lo que se vuelva a meter en la ventana de contexto','Las últimas 10 respuestas'], a:1, e:'El modelo no cambia entre sesiones. Todo lo que «recuerda» es texto que se carga en el contexto: CLAUDE.md, la memoria, lo que lee.'},
+  {q:'Tu proyecto tiene AGENTS.md y CLAUDE.md (sin imports). ¿Qué lee Hermes?', o:['Los dos','Solo CLAUDE.md','Solo AGENTS.md'], a:2, e:'Hermes carga un único fichero de proyecto y AGENTS.md va antes que CLAUDE.md en su lista.'},
+  {q:'Hermes guarda en USER.md que prefieres respuestas cortas. ¿Cuándo aparece en su system prompt?', o:['Inmediatamente','En la siguiente sesión, porque la memoria se carga como foto fija al arrancar','Nunca, USER.md es solo para el usuario'], a:1, e:'La memoria se inyecta como snapshot al empezar la sesión. Lo nuevo entra en la próxima.'},
+  {q:'¿Por qué Hermes limita MEMORY.md a 2.200 caracteres?', o:['Por un fallo de diseño','Para obligar al agente a curar en vez de acumular, porque se carga en cada turno','Porque SQLite no admite más'], a:1, e:'Va en el system prompt de cada sesión. Un límite pequeño mantiene la memoria barata y obliga a quedarse con lo importante.'},
+  {q:'¿Quién propuso en 1972 que las palabras raras pesen más al buscar, la base de BM25?', o:['Vannevar Bush','Karen Spärck Jones','Andrej Karpathy'], a:1, e:'Karen Spärck Jones propuso el IDF (inverse document frequency) en 1972.'},
+  {q:'¿Qué hace Contextual Retrieval, la técnica que Anthropic presentó en 2024?', o:['Usa contextos de un millón de tokens','Añade a cada chunk una explicación de su documento antes de indexarlo','Sustituye los vectores por grep'], a:1, e:'Así un trozo suelto no pierde su contexto. Anthropic midió un 49 % menos de fallos de recuperación (67 % con re-ranking).'},
+  {q:'¿Cuál es la diferencia de fondo entre RAG y LLM-Wiki?', o:['RAG usa Markdown y LLM-Wiki usa vectores','RAG busca trozos en cada pregunta; LLM-Wiki sintetiza una vez al ingerir y lo mantiene','Ninguna, son lo mismo con otro nombre'], a:1, e:'En RAG nada se acumula. En LLM-Wiki la síntesis ya está escrita cuando preguntas, y cada fuente nueva actualiza lo existente.'},
+  {q:'Según Karpathy, ¿qué no pudo resolver el Memex de Vannevar Bush en 1945?', o:['Guardar documentos en microfilm','Quién hace el mantenimiento de los enlaces y resúmenes','Enlazar documentos entre sí'], a:1, e:'El Memex ya enlazaba documentos. Lo que faltaba era alguien que lo mantuviera sin aburrirse: ese es el papel del LLM.'}
+];
+const quiz = document.getElementById('quiz'), scoreEl = document.getElementById('score'); let score = 0;
+QS.forEach((item, qi) => {
+  const box = document.createElement('div'); box.className = 'qq';
+  const h = document.createElement('b'); h.textContent = (qi+1) + '. ' + item.q; box.appendChild(h);
+  const opts = document.createElement('div'); opts.className = 'opts'; box.appendChild(opts);
+  const fb = document.createElement('p'); fb.className = 'fb'; box.appendChild(fb);
+  item.o.forEach((text, oi) => {
+    const b = document.createElement('button'); b.type='button'; b.id = `q${qi}-${oi}`; b.textContent = text;
+    b.addEventListener('click', () => {
+      if (box.dataset.done) return; box.dataset.done = '1';
+      opts.querySelectorAll('button').forEach((x, xi) => { if (xi === item.a) x.classList.add('right'); });
+      if (oi === item.a) { score++; fb.textContent = 'Correcto. ' + item.e; } else { b.classList.add('wrong'); fb.textContent = 'No exactamente. ' + item.e; }
+      scoreEl.textContent = score + ' de ' + QS.length;
+    });
+    opts.appendChild(b);
+  });
+  quiz.appendChild(box);
+});
+})();
+</script>
