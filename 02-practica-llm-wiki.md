@@ -105,6 +105,13 @@ Dentro de Claude Code:
 /ingest raw/2026-11-01-apuntes-rag.md
 ```
 
+> ❓ **¿`/ingest` es una skill? ¿Cómo se instala?** No se instala: es un *comando personalizado* que viene
+> en el vault, en el fichero `.claude/commands/ingest.md` (instrucciones en Markdown). Al arrancar `claude`
+> **dentro de la carpeta**, cada fichero de `.claude/commands/` se convierte en un comando (`ingest.md` → `/ingest`).
+> Escribe `/` para ver la lista. Si arrancas `claude` en otra carpeta, `/ingest` no aparece. Las skills
+> (`.claude/skills/<nombre>/SKILL.md`) son parecidas, pero el agente puede usarlas por su cuenta. Hermes no lee
+> `.claude/commands/`: con él se pide en lenguaje normal.
+
 El agente te resume la fuente y te pregunta si quieres enfatizar algo. Contesta (o di "adelante").
 Después crea la página de la fuente, las de cada concepto, actualiza `index.md` y `log.md`.
 

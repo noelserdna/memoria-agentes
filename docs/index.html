@@ -278,6 +278,15 @@ td.y{color:var(--teal); font-weight:700} td.n{color:var(--rose); font-weight:700
 .code pre{margin:0; padding:14px 16px; padding-right:84px; overflow-x:auto; font-family:var(--f-mono); font-size:.84rem; line-height:1.55}
 .code .copy{position:absolute; top:8px; right:8px; font-family:var(--f-mono); font-size:.72rem; background:transparent; color:var(--code-fg); border:1px solid #ffffff40; border-radius:6px; padding:4px 8px; cursor:pointer}
 .code .c-com{color:var(--term-dim)}
+.glos{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px}
+.glos>div{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px; display:flex; flex-direction:column; gap:6px}
+.glos b{font-family:var(--f-display); font-size:1.1rem}
+.glos p{font-size:.95rem}
+.step p.ok{background:var(--teal-soft); border-radius:10px; padding:10px 12px; font-size:.95rem}
+.step p.why{background:var(--amber-soft); border-radius:10px; padding:10px 12px; font-size:.95rem}
+.faq{background:var(--indigo-soft); border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:10px}
+.faq>b{font-family:var(--f-display); font-size:1.25rem}
+kbd{border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:.05em .4em; background:var(--surface)}
 .proof{display:grid; grid-template-columns:auto 1fr; gap:18px; align-items:center; background:var(--teal-soft); border-radius:14px; padding:20px}
 .proof .big{font-family:var(--f-display); font-weight:800; font-size:clamp(2.4rem,6vw,3.6rem); line-height:1; color:var(--teal)}
 @media (max-width:520px){ .proof{grid-template-columns:1fr} }
@@ -311,12 +320,12 @@ footer ul{padding-left:1.1em; display:flex; flex-direction:column; gap:4px}
 @keyframes pop{0%,100%{transform:scale(1)} 20%{transform:scale(1.35)} 35%{transform:scale(1)}}
 @media (prefers-reduced-motion: reduce){ .sway,.write,.fill,.fly,.draw,.pop{animation:none!important} }
 </style>
+</head>
+<body>
 
 <div class="wrap">
 
 <!-- HERO -->
-</head>
-<body>
 <header class="hero">
   <div class="stack">
     <span class="eyebrow">Clase · Agentes de código · Claude Code y Hermes</span>
@@ -802,33 +811,95 @@ footer ul{padding-left:1.1em; display:flex; flex-direction:column; gap:4px}
 <section>
   <div class="stack">
     <span class="eyebrow">Práctica</span>
-    <h2>Tu LLM-Wiki en seis pasos</h2>
-    <p class="lead">Necesitas <code>git</code> y Claude Code o Hermes ya instalados. El vault de partida está en la carpeta <code>llm-wiki-demo/</code> del material.</p>
+    <h2>Tu LLM-Wiki paso a paso</h2>
+    <p class="lead">No hace falta saber programar. Si nunca has abierto una terminal, empieza por las tres palabras de abajo; luego sigue los pasos en orden. Cada paso te dice cómo comprobar que ha salido bien.</p>
   </div>
-  <div class="steps" style="margin-top:28px">
-    <div class="step"><span class="num"></span><div class="c"><h3>Instala Obsidian</h3><p>Lo usamos como visor: grafo, enlaces y vista previa. Quien escribe es el agente. Añade la extensión Obsidian Web Clipper para guardar artículos web en <code>raw/</code>.</p>
-      <div class="code"><pre>brew install --cask obsidian      <span class="c-com"># macOS</span>
-winget install Obsidian.Obsidian  <span class="c-com"># Windows</span></pre><button class="copy">Copiar</button></div></div></div>
-    <div class="step"><span class="num"></span><div class="c"><h3>Copia el vault y ponlo en git</h3><p>La wiki la escribe un LLM: con git ves qué cambió en cada ingesta y lo deshaces si se equivoca.</p>
-      <div class="code"><pre>cp -R llm-wiki-demo ~/mi-llm-wiki
-cd ~/mi-llm-wiki
-git init &amp;&amp; git add -A &amp;&amp; git commit -m "Vault inicial"</pre><button class="copy">Copiar</button></div></div></div>
-    <div class="step"><span class="num"></span><div class="c"><h3>Ábrelo en Obsidian</h3><p><i>Open folder as vault</i> → <code>~/mi-llm-wiki</code>. En <i>Settings → Files and links</i> activa <i>Use [[Wikilinks]]</i> y manda los adjuntos a <code>raw/assets</code>. Abre la vista de grafo con <kbd>Cmd/Ctrl + G</kbd>.</p></div></div>
-    <div class="step"><span class="num"></span><div class="c"><h3>Ingiere con cualquiera de los dos agentes</h3>
-      <div class="code"><pre>claude
-&gt; /ingest raw/2026-11-01-apuntes-rag.md
 
-<span class="c-com"># o con Hermes, que encuentra AGENTS.md solo:</span>
-hermes
-&gt; Ingiere raw/2026-11-05-apuntes-memoria-hermes.md siguiendo AGENTS.md</pre><button class="copy">Copiar</button></div>
-      <p>Deja Obsidian al lado y mira cómo aparecen las páginas.</p></div></div>
-    <div class="step"><span class="num"></span><div class="c"><h3>Pregunta y revisa</h3>
-      <div class="code"><pre>/query ¿En qué se parece la memoria de Hermes a la auto memory de Claude Code?
-/lint
-git diff wiki/                         <span class="c-com"># qué ha reescrito</span>
-grep "^## \[" wiki/log.md | tail -5    <span class="c-com"># últimas operaciones</span></pre><button class="copy">Copiar</button></div></div></div>
-    <div class="step"><span class="num"></span><div class="c"><h3>Aliméntala con fuentes reales</h3><p>Recorta con Web Clipper el gist de Karpathy y la documentación de memoria de Hermes y de Claude Code, y ejecuta <code>/ingest pendientes</code>.</p></div></div>
+  <div class="glos" style="margin-top:24px">
+    <div><b>Terminal</b><p>Una ventana donde le das órdenes al ordenador escribiendo en vez de con clics. Escribes (o pegas) una línea y pulsas <kbd>Enter</kbd>. Si no sale ningún error, ha funcionado: muchas órdenes no dicen nada al terminar.</p></div>
+    <div><b>Carpeta = vault</b><p>Obsidian llama <i>vault</i> a una carpeta normal con ficheros de texto (<code>.md</code>). Tu wiki entera será una carpeta llamada <code>mi-llm-wiki</code>. Puedes abrirla también desde el Finder o el Explorador.</p></div>
+    <div><b>Agente</b><p>Claude Code (o Hermes) es un programa que se usa <i>dentro</i> de la terminal: escribes <code>claude</code>, pulsas <kbd>Enter</kbd> y a partir de ahí le hablas en español, como en un chat, pero puede leer y escribir ficheros de la carpeta.</p></div>
   </div>
+
+  <div class="steps" style="margin-top:28px">
+
+    <div class="step"><span class="num"></span><div class="c"><h3>Abre la terminal</h3>
+      <p><b>Mac:</b> pulsa <kbd>Cmd + Espacio</kbd>, escribe <i>Terminal</i> y pulsa <kbd>Enter</kbd>.<br><b>Windows:</b> pulsa la tecla Windows, escribe <i>Terminal</i> (o <i>PowerShell</i>) y ábrelo.</p>
+      <p>Para pegar en la terminal: <kbd>Cmd + V</kbd> en Mac, <kbd>Ctrl + V</kbd> o clic derecho en Windows. Comprueba si tienes <b>git</b> (el programa que guarda versiones de los ficheros):</p>
+      <div class="code"><pre>git --version</pre><button class="copy">Copiar</button></div>
+      <p class="ok">✓ Si sale algo como <code>git version 2.4x</code>, perfecto. En Mac, si aparece una ventana ofreciendo instalar las «herramientas de línea de comandos», acepta y espera a que termine. En Windows, si dice que no lo encuentra, instálalo desde <a href="https://git-scm.com/download/win">git-scm.com</a> y vuelve a abrir la terminal.</p>
+    </div></div>
+
+    <div class="step"><span class="num"></span><div class="c"><h3>Instala el agente (uno de los dos)</h3>
+      <p><b>Claude Code</b> necesita una cuenta de Claude de pago (Pro o Max) o una cuenta de la consola de Anthropic. Pega la línea de tu sistema:</p>
+      <div class="code"><pre>curl -fsSL https://claude.ai/install.sh | bash      <span class="c-com"># Mac y Linux</span></pre><button class="copy">Copiar</button></div>
+      <div class="code"><pre>irm https://claude.ai/install.ps1 | iex             <span class="c-com"># Windows (PowerShell)</span></pre><button class="copy">Copiar</button></div>
+      <p><b>Hermes Agent</b> es gratuito y open source; la primera vez te pedirá qué modelo usar y su clave.</p>
+      <div class="code"><pre>curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash   <span class="c-com"># Mac y Linux</span></pre><button class="copy">Copiar</button></div>
+      <div class="code"><pre>iex (irm https://hermes-agent.nousresearch.com/install.ps1)          <span class="c-com"># Windows</span></pre><button class="copy">Copiar</button></div>
+      <p class="ok">✓ <b>Cierra la terminal y ábrela de nuevo</b> (para que se entere de lo que acabas de instalar) y escribe <code>claude --version</code> o <code>hermes --version</code>. Si responde con un número, está instalado. La primera vez que escribas <code>claude</code> se abrirá el navegador para iniciar sesión.</p>
+    </div></div>
+
+    <div class="step"><span class="num"></span><div class="c"><h3>Instala Obsidian</h3>
+      <p>Esta parte es como cualquier otro programa: descárgalo de <a href="https://obsidian.md/download">obsidian.md/download</a> e instálalo con doble clic. Es gratis. Obsidian solo lo usarás para <b>mirar</b> la wiki (páginas, enlaces y el grafo); quien escribe es el agente.</p>
+      <p class="ok">✓ Lo abres y ves una pantalla de bienvenida. Déjala así de momento.</p>
+    </div></div>
+
+    <div class="step"><span class="num"></span><div class="c"><h3>Descarga el material y crea tu wiki</h3>
+      <p>Pega estas líneas <b>una a una</b> en la terminal, pulsando <kbd>Enter</kbd> tras cada una. Primero descargas el material del curso:</p>
+      <div class="code"><pre>cd ~
+git clone https://github.com/noelserdna/memoria-agentes.git</pre><button class="copy">Copiar</button></div>
+      <p>Luego copias la carpeta de ejemplo con el nombre de tu wiki:</p>
+      <div class="code"><pre>cp -R memoria-agentes/llm-wiki-demo mi-llm-wiki                    <span class="c-com"># Mac y Linux</span></pre><button class="copy">Copiar</button></div>
+      <div class="code"><pre>Copy-Item -Recurse memoria-agentes\llm-wiki-demo mi-llm-wiki      <span class="c-com"># Windows</span></pre><button class="copy">Copiar</button></div>
+      <p>Y «entras» en ella y le pones el control de versiones. <code>cd</code> significa <i>cambiar de carpeta</i>: a partir de aquí todo lo que hagas en la terminal ocurre dentro de <code>mi-llm-wiki</code>.</p>
+      <div class="code"><pre>cd mi-llm-wiki
+git init
+git add -A
+git commit -m "Vault inicial"</pre><button class="copy">Copiar</button></div>
+      <p class="why"><b>¿Por qué git?</b> Porque la wiki la escribe una IA. Git hace una «foto» de la carpeta: si el agente se equivoca, puedes ver qué cambió y volver atrás.</p>
+      <p class="ok">✓ Escribe <code>ls</code> (en Windows también vale): deberías ver <code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>raw</code> y <code>wiki</code>. Si <code>git commit</code> te pide tu nombre y correo, sigue las dos líneas que te muestra y repítelo.</p>
+      <p style="font-size:.92rem; color:var(--muted)">¿No te funciona git? Alternativa sin terminal: en la <a href="https://github.com/noelserdna/memoria-agentes">página del repositorio</a> pulsa <i>Code → Download ZIP</i>, descomprímelo y copia la carpeta <code>llm-wiki-demo</code> a tu carpeta personal con el nombre <code>mi-llm-wiki</code>.</p>
+    </div></div>
+
+    <div class="step"><span class="num"></span><div class="c"><h3>Ábrela en Obsidian</h3>
+      <p>En Obsidian pulsa <i>Open folder as vault</i> (abrir carpeta como vault) y elige <code>mi-llm-wiki</code>, que está en tu carpeta personal. Luego, en el engranaje de abajo a la izquierda → <i>Files and links</i>, activa <i>Use [[Wikilinks]]</i>.</p>
+      <p>Abre la <b>vista de grafo</b> con <kbd>Cmd + G</kbd> (Mac) o <kbd>Ctrl + G</kbd> (Windows).</p>
+      <p class="ok">✓ El grafo sale casi vacío. Es lo esperado: todavía no hay wiki. Coloca Obsidian en una mitad de la pantalla y la terminal en la otra.</p>
+    </div></div>
+
+    <div class="step"><span class="num"></span><div class="c"><h3>Arranca el agente y que construya la wiki</h3>
+      <p>En la terminal, <b>estando dentro de <code>mi-llm-wiki</code></b> (paso 4), arranca Claude Code:</p>
+      <div class="code"><pre>claude</pre><button class="copy">Copiar</button></div>
+      <p>Te preguntará si confías en esta carpeta: responde que sí. Ahora ya no estás «hablando con el ordenador» sino con el agente. Escribe:</p>
+      <div class="code"><pre>/ingest raw/2026-11-01-apuntes-rag.md</pre><button class="copy">Copiar</button></div>
+      <p>El agente leerá la fuente, te contará en dos líneas de qué va y te preguntará si quieres destacar algo: contesta <i>adelante</i>. Cuando pida permiso para crear ficheros, acepta.</p>
+      <p class="ok">✓ Mira Obsidian: en uno o dos minutos aparecen páginas nuevas y el grafo se llena de puntos conectados. Repite con las otras dos fuentes de la carpeta <code>raw</code>.</p>
+      <p><b>Con Hermes</b> es igual, pero en vez de <code>/ingest</code> se lo pides con palabras:</p>
+      <div class="code"><pre>hermes</pre><button class="copy">Copiar</button></div>
+      <div class="code"><pre>Ingiere raw/2026-11-05-apuntes-memoria-hermes.md siguiendo AGENTS.md</pre><button class="copy">Copiar</button></div>
+    </div></div>
+
+    <div class="step"><span class="num"></span><div class="c"><h3>Pregúntale a tu wiki y revisa qué ha hecho</h3>
+      <p>Dentro del agente, haz una pregunta. Contestará leyendo la wiki y citando páginas que puedes abrir en Obsidian:</p>
+      <div class="code"><pre>/query ¿En qué se parece la memoria de Hermes a la auto memory de Claude Code?</pre><button class="copy">Copiar</button></div>
+      <p>Cada pocas ingestas pide un repaso (busca contradicciones, páginas sueltas y enlaces rotos; te pregunta antes de corregir):</p>
+      <div class="code"><pre>/lint</pre><button class="copy">Copiar</button></div>
+      <p>Para salir del agente escribe <code>/exit</code>. Ya en la terminal normal, guarda una «foto» de cómo ha quedado:</p>
+      <div class="code"><pre>git add -A
+git commit -m "Primeras ingestas"</pre><button class="copy">Copiar</button></div>
+      <p class="ok">✓ <b>Y después:</b> guarda artículos que te interesen dentro de <code>raw</code> (a mano o con la extensión <a href="https://obsidian.md/clipper">Obsidian Web Clipper</a>) y pide <code>/ingest pendientes</code>: el agente procesa todo lo nuevo de una vez.</p>
+    </div></div>
+  </div>
+
+  <div class="faq" style="margin-top:28px">
+    <b>«¿<code>/ingest</code> es una skill? ¿Cómo se instala?»</b>
+    <p><b>No hay que instalar nada:</b> viene dentro de la carpeta que copiaste. Es un <b>comando personalizado</b> de Claude Code, y no es más que un fichero de texto: <code>mi-llm-wiki/.claude/commands/ingest.md</code>. Ábrelo y verás que son instrucciones en español («lee la fuente, crea las páginas, actualiza el índice…»).</p>
+    <p>Cuando arrancas <code>claude</code> <b>dentro de esa carpeta</b>, Claude Code mira <code>.claude/commands/</code> y convierte cada fichero en un comando: <code>ingest.md</code> → <code>/ingest</code>, <code>query.md</code> → <code>/query</code>, <code>lint.md</code> → <code>/lint</code>. Escribe solo <code>/</code> y aparecerá la lista. Por eso, si arrancas <code>claude</code> en otra carpeta, <code>/ingest</code> «no existe».</p>
+    <p>Las <b>skills</b> (<code>.claude/skills/nombre/SKILL.md</code>) son un primo cercano: también son instrucciones en Markdown, pero el agente puede usarlas por su cuenta cuando cree que vienen al caso. Para algo que tú lanzas a mano, un comando es lo más sencillo. <b>Hermes</b> no lee esa carpeta: por eso con él lo pides en lenguaje normal, y funciona porque las reglas de verdad están en <code>AGENTS.md</code>.</p>
+    <p style="font-size:.92rem; color:var(--muted)">Ojo con el nombre: es <code>/ingest</code> (de <i>ingerir</i>, meter una fuente en la wiki), no <code>/digest</code>.</p>
+  </div>
+
   <div class="proof" style="margin-top:32px">
     <span class="big">1 → 10</span>
     <div class="stack" style="gap:6px"><b style="font-family:var(--f-display); font-size:1.2rem">Lo hemos probado con este mismo vault</b>
