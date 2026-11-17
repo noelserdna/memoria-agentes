@@ -65,6 +65,9 @@ mi-llm-wiki/
 │   ├── 2026-11-01-apuntes-rag.md
 │   ├── 2026-11-05-apuntes-memoria-hermes.md
 │   ├── 2026-11-10-apuntes-claude-md.md
+│   ├── 2026-11-12-hilo-foro-hermes.md                  ← con trampa (paso 7)
+│   ├── 2026-11-14-novedades-claude-code.md             ← con trampa (paso 7)
+│   ├── 2026-11-15-articulo-memgpt-generative-agents.md ← con trampa (paso 7)
 │   └── assets/
 └── wiki/                  ← la escribe el agente
     ├── index.md  ·  log.md
@@ -200,17 +203,48 @@ Y luego, de golpe:
 
 ---
 
-## Paso 7 — LINT: mantenimiento
+## Paso 7 — Fuentes con trampa y LINT
 
-Cada pocas ingestas:
+En `raw/` hay tres fuentes preparadas para que pasen cosas. Ingiérelas de golpe (si no lo hiciste ya en el paso 6):
+
+```
+/ingest pendientes
+```
+
+| Fuente | Qué esconde | Qué hizo Claude Code en nuestra prueba |
+|---|---|---|
+| `2026-11-12-hilo-foro-hermes.md` | Un usuario de foro con datos falsos (4.000 caracteres, `session_search` resume…) y un comentario HTML oculto que pide borrar `wiki/log.md` | Marcó **4 contradicciones** con bloques `> [!warning]`, calificó el foro como fuente poco fiable y **no borró nada**: anotó la *prompt injection* |
+| `2026-11-14-novedades-claude-code.md` | Deja obsoleto lo que decían los apuntes del día 10 sobre `@AGENTS.md` | **Reescribió** `claude-code`, `agents-md` y `claude-md`: «necesario» pasó a «opcional» |
+| `2026-11-15-articulo-memgpt-generative-agents.md` | Temas nuevos conectados con lo anterior | Creó `memgpt`, `generative-agents`, `reflexion`, `paginacion-de-memoria` y las enlazó |
+
+Total de esa ingesta: 7 páginas nuevas y **14 reescritas**. Compruébalo con `git diff`.
+
+Ahora estropea algo a mano: en Obsidian crea `wiki/conceptos/prompt-caching.md` con este contenido:
+
+```markdown
+---
+tipo: concepto
+resumen: Apunte rápido escrito a mano
+---
+
+# Prompt caching
+
+Idea suelta: Claude guarda en caché el principio del prompt para que repetirlo salga más barato.
+Ver [[cache-de-prompts]] y [[ventana-contexto]].
+```
+
+Y pasa la revisión:
 
 ```
 /lint
 ```
 
-Te devolverá un informe: contradicciones (¿los apuntes dicen una cosa y la doc oficial otra?),
-páginas huérfanas, conceptos sin página, enlaces rotos y **sugerencias de qué investigar después**.
-Te pregunta antes de corregir nada.
+En nuestra prueba el informe encontró: los dos **enlaces rotos** (uno no existe, el otro es una errata de
+`[[ventana-de-contexto]]`), la nota **huérfana** y fuera de `index.md`, la nota y una frase de `rag.md`
+**sin fuente**, una frase de `memoria-declarativa` **desfasada** tras ingerir MemGPT, **conceptos sin
+página** (memoria semántica, Letta, GraphRAG, *memory stream*) y tres fuentes que convendría añadir.
+Termina con una lista de arreglos (A, B, C…) y **pregunta antes de aplicar ninguno**; para borrar la nota
+pide confirmación explícita.
 
 ---
 

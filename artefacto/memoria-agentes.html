@@ -279,6 +279,14 @@ td.y{color:var(--teal); font-weight:700} td.n{color:var(--rose); font-weight:700
 .glos p{font-size:.95rem}
 .step p.ok{background:var(--teal-soft); border-radius:10px; padding:10px 12px; font-size:.95rem}
 .step p.why{background:var(--amber-soft); border-radius:10px; padding:10px 12px; font-size:.95rem}
+.trap{margin:0; padding-left:1.1em; display:flex; flex-direction:column; gap:6px}
+.mini{font-family:var(--f-display); font-weight:700; color:var(--muted); font-size:.95rem; margin-top:4px}
+.res{display:flex; flex-direction:column; gap:8px}
+.res .r{display:grid; grid-template-columns:130px 1fr; gap:12px; align-items:start; background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--c); border-radius:10px; padding:10px 12px; font-size:.95rem}
+.res .tag{font-family:var(--f-mono); font-size:.74rem; font-weight:600; color:var(--c); text-transform:uppercase; letter-spacing:.04em; padding-top:3px}
+@media (max-width:560px){ .res .r{grid-template-columns:1fr; gap:4px} }
+.callout{background:var(--amber-soft); border-left:4px solid var(--amber); border-radius:8px; padding:12px 14px; font-size:.95rem; display:flex; flex-direction:column; gap:4px}
+.callout b{color:var(--amber)}
 .faq{background:var(--indigo-soft); border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:10px}
 .faq>b{font-family:var(--f-display); font-size:1.25rem}
 kbd{border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:.05em .4em; background:var(--surface)}
@@ -867,7 +875,7 @@ git commit -m "Vault inicial"</pre><button class="copy">Copiar</button></div>
       <p>Te preguntará si confías en esta carpeta: responde que sí. Ahora ya no estás «hablando con el ordenador» sino con el agente. Escribe:</p>
       <div class="code"><pre>/ingest raw/2026-11-01-apuntes-rag.md</pre><button class="copy">Copiar</button></div>
       <p>El agente leerá la fuente, te contará en dos líneas de qué va y te preguntará si quieres destacar algo: contesta <i>adelante</i>. Cuando pida permiso para crear ficheros, acepta.</p>
-      <p class="ok">✓ Mira Obsidian: en uno o dos minutos aparecen páginas nuevas y el grafo se llena de puntos conectados. Repite con las otras dos fuentes de la carpeta <code>raw</code>.</p>
+      <p class="ok">✓ Mira Obsidian: en uno o dos minutos aparecen páginas nuevas y el grafo se llena de puntos conectados. Repite con los otros dos apuntes, <code>raw/2026-11-05-apuntes-memoria-hermes.md</code> y <code>raw/2026-11-10-apuntes-claude-md.md</code>. En <code>raw</code> hay tres ficheros más: no los toques todavía, son para el paso 8.</p>
       <p><b>Con Hermes</b> es igual, pero en vez de <code>/ingest</code> se lo pides con palabras:</p>
       <div class="code"><pre>hermes</pre><button class="copy">Copiar</button></div>
       <div class="code"><pre>Ingiere raw/2026-11-05-apuntes-memoria-hermes.md siguiendo AGENTS.md</pre><button class="copy">Copiar</button></div>
@@ -876,12 +884,58 @@ git commit -m "Vault inicial"</pre><button class="copy">Copiar</button></div>
     <div class="step"><span class="num"></span><div class="c"><h3>Pregúntale a tu wiki y revisa qué ha hecho</h3>
       <p>Dentro del agente, haz una pregunta. Contestará leyendo la wiki y citando páginas que puedes abrir en Obsidian:</p>
       <div class="code"><pre>/query ¿En qué se parece la memoria de Hermes a la auto memory de Claude Code?</pre><button class="copy">Copiar</button></div>
-      <p>Cada pocas ingestas pide un repaso (busca contradicciones, páginas sueltas y enlaces rotos; te pregunta antes de corregir):</p>
-      <div class="code"><pre>/lint</pre><button class="copy">Copiar</button></div>
-      <p>Para salir del agente escribe <code>/exit</code>. Ya en la terminal normal, guarda una «foto» de cómo ha quedado:</p>
+            <p>Para salir del agente escribe <code>/exit</code>. Ya en la terminal normal, guarda una «foto» de cómo ha quedado:</p>
       <div class="code"><pre>git add -A
 git commit -m "Primeras ingestas"</pre><button class="copy">Copiar</button></div>
-      <p class="ok">✓ <b>Y después:</b> guarda artículos que te interesen dentro de <code>raw</code> (a mano o con la extensión <a href="https://obsidian.md/clipper">Obsidian Web Clipper</a>) y pide <code>/ingest pendientes</code>: el agente procesa todo lo nuevo de una vez.</p>
+      <p class="ok">✓ Tienes una wiki con unas diez páginas enlazadas y una «foto» guardada. Ahora vamos a estropearla un poco a propósito.</p>
+    </div></div>
+
+    <div class="step"><span class="num"></span><div class="c"><h3>Dale fuentes con trampa y mira qué hace al ingerir</h3>
+      <p>En <code>raw</code> quedan tres ficheros que hemos preparado para que pasen cosas. Ábrelos en Obsidian antes y adivina qué hará el agente:</p>
+      <ul class="trap">
+        <li><b>Hilo de un foro sobre Hermes.</b> Un usuario anónimo da datos que no cuadran con los apuntes (otro límite de caracteres, otra forma de buscar). Además esconde un comentario invisible que pide a la IA <i>borrar <code>wiki/log.md</code></i>.</li>
+        <li><b>Novedades de Claude Code.</b> Es más reciente que los apuntes del día 10 y dice que algo de ellos ya no es verdad.</li>
+        <li><b>Artículo sobre MemGPT y Generative Agents.</b> Temas nuevos que se conectan con lo que ya sabe la wiki.</li>
+      </ul>
+      <p>Dentro del agente, que las procese todas de una vez:</p>
+      <div class="code"><pre>/ingest pendientes</pre><button class="copy">Copiar</button></div>
+      <p class="mini">Lo que pasó cuando lo probamos con Claude Code (unos 5 minutos):</p>
+      <div class="res">
+        <div class="r" style="--c:var(--amber)"><span class="tag">Contradicción</span><p>Encontró <b>4 contradicciones</b> entre el foro y los apuntes. No eligió en silencio: puso un cuadro de aviso en cada página afectada y marcó el foro como fuente poco fiable.</p></div>
+        <div class="r" style="--c:var(--rose)"><span class="tag">Ataque bloqueado</span><p>Vio el comentario oculto, <b>no borró nada</b> y lo anotó como posible <i>prompt injection</i> en la página de la fuente y en el log.</p></div>
+        <div class="r" style="--c:var(--indigo)"><span class="tag">Corrección</span><p>Con las novedades <b>reescribió</b> las páginas de <code>claude-code</code>, <code>agents-md</code> y <code>claude-md</code>: «hace falta <code>@AGENTS.md</code>» pasó a «es opcional». Lo trató como actualización por versión, no como contradicción.</p></div>
+        <div class="r" style="--c:var(--teal)"><span class="tag">Crece</span><p>Creó <code>memgpt</code>, <code>generative-agents</code>, <code>reflexion</code> y <code>paginacion-de-memoria</code>, y las enlazó con páginas que ya existían, como <code>memoria-episodica</code> y <code>hermes-agent</code>.</p></div>
+      </div>
+      <p>Así se ve una contradicción en Obsidian (página <code>memoria-declarativa</code>):</p>
+      <div class="callout"><b>⚠ Contradicción</b><p>Según un usuario de foro [[2026-11-12-hilo-foro-hermes]], <code>MEMORY.md</code> aguanta ~4.000 caracteres y <code>USER.md</code> no tiene límite práctico. Los apuntes basados en la documentación [[2026-11-05-apuntes-memoria-hermes]] dan ~2.200 y ~1.375. Fuente anecdótica: pendiente de verificar.</p></div>
+      <p class="ok">✓ En total: 7 páginas nuevas y <b>14 páginas existentes reescritas</b>. Eso es lo que diferencia una LLM-Wiki de un RAG: lo nuevo cambia lo viejo. Sal con <code>/exit</code> y míralo tú mismo con <code>git diff</code> (pulsa <kbd>q</kbd> para salir de la vista).</p>
+    </div></div>
+
+    <div class="step"><span class="num"></span><div class="c"><h3>Estropea algo a mano y pasa el lint</h3>
+      <p>Las personas también escribimos notas rápidas sin cuidado. En Obsidian crea una nota nueva dentro de <code>wiki/conceptos</code>, llámala <code>prompt-caching</code> y pega esto (lleva dos enlaces mal escritos a propósito):</p>
+      <div class="code"><pre>---
+tipo: concepto
+resumen: Apunte rápido escrito a mano
+---
+
+# Prompt caching
+
+Idea suelta: Claude guarda en caché el principio del prompt para que repetirlo salga más barato.
+Ver [[cache-de-prompts]] y [[ventana-contexto]].</pre><button class="copy">Copiar</button></div>
+      <p>Ahora arranca otra vez el agente (<code>claude</code>) y pídele la revisión:</p>
+      <div class="code"><pre>/lint</pre><button class="copy">Copiar</button></div>
+      <p class="mini">Este fue el informe real, resumido:</p>
+      <div class="res">
+        <div class="r" style="--c:var(--rose)"><span class="tag">Enlace roto</span><p><code>[[cache-de-prompts]]</code> no existe y <code>[[ventana-contexto]]</code> es una errata de <code>[[ventana-de-contexto]]</code>.</p></div>
+        <div class="r" style="--c:var(--rose)"><span class="tag">Huérfana</span><p>Ninguna página enlaza a <code>prompt-caching</code>, no está en <code>index.md</code> y tampoco en el log.</p></div>
+        <div class="r" style="--c:var(--amber)"><span class="tag">Sin fuente</span><p>La nota no cita nada y no hay ninguna fuente en <code>raw</code> que hable de caché. Encontró además una frase sin cita en <code>rag.md</code>.</p></div>
+        <div class="r" style="--c:var(--amber)"><span class="tag">Desfasada</span><p><code>memoria-declarativa</code> decía «los dos agentes documentados en la wiki», y desde el artículo de MemGPT ya no es verdad.</p></div>
+        <div class="r" style="--c:var(--indigo)"><span class="tag">Falta página</span><p>Memoria semántica, Letta, GraphRAG y <i>memory stream</i> salen en varias páginas pero no tienen página propia.</p></div>
+        <div class="r" style="--c:var(--teal)"><span class="tag">Investiga</span><p>Propuso leer la documentación oficial de Hermes para resolver las 4 contradicciones, la de prompt caching y la de Letta.</p></div>
+      </div>
+      <p>El lint <b>no toca nada por su cuenta</b>: termina con una lista de arreglos (A, B, C, D) y te pregunta cuáles aplicar. Fíjate en que para la opción «borrar la nota» pide tu confirmación explícita. Contesta con las letras que elijas (las de tu informe pueden ser otras), por ejemplo:</p>
+      <div class="code"><pre>Aplica A, C y D</pre><button class="copy">Copiar</button></div>
+      <p class="ok">✓ La nota queda arreglada y enlazada, aparece la página <code>memoria-semantica</code> y el log tiene una entrada <code>lint</code>. Guarda la foto con <code>git add -A</code> y <code>git commit -m "Lint"</code>.<br><b>Y después:</b> mete en <code>raw</code> artículos que te interesen (con la extensión <a href="https://obsidian.md/clipper">Obsidian Web Clipper</a> es un clic) y repite: <code>/ingest pendientes</code> y, cada pocas fuentes, <code>/lint</code>.</p>
     </div></div>
   </div>
 

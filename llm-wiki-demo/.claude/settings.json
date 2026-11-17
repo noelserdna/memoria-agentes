@@ -1,5 +1,5 @@
 {
   "permissions": {
-    "deny": ["Edit(raw/**)", "Write(raw/**)"]
+    "deny": ["Edit(raw/**)"]
   }
 }
